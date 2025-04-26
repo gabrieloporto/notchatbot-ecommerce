@@ -23,11 +23,11 @@ export default function CheckoutPage() {
   return (
     <main className="container mx-auto px-4 py-8">
       <h1 className="mb-8 text-2xl font-bold">Finalizar compra</h1>
-      <div className="grid gap-8 md:grid-cols-2">
-        <div>
+      <div className="flex flex-col-reverse gap-8 md:flex-row">
+        <div className="md:w-1/2">
           <CheckoutForm />
         </div>
-        <div>
+        <div className="md:w-1/2">
           <OrderSummary />
         </div>
       </div>
