@@ -1,8 +1,16 @@
 "use client";
 
 import { useToast } from "@/components/ui/use-toast";
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+  useMemo,
+  useState,
+} from "react";
 
+// Types
 interface Product {
   id: number;
   name: string;
@@ -16,152 +24,253 @@ interface CartItem {
   quantity: number;
 }
 
-interface CartContextType {
+type ShippingMethod = "delivery" | "pickup" | null;
+
+interface CartState {
   items: CartItem[];
+  shippingMethod: ShippingMethod;
+  postalCode: string;
+  shippingPrice: number;
+  shouldOpenCart: boolean;
+}
+
+interface CartContextType extends CartState {
   addToCart: (product: Product) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   getTotal: () => number;
-  shippingMethod: "delivery" | "pickup" | null;
-  setShippingMethod: (method: "delivery" | "pickup" | null) => void;
-  postalCode: string;
+  setShippingMethod: (method: ShippingMethod) => void;
   setPostalCode: (code: string) => void;
-  shippingPrice: number;
   setShippingPrice: (price: number) => void;
+  calculateShipping: (code: string) => Promise<void>;
+  setShouldOpenCart: (shouldOpen: boolean) => void;
 }
+
+// Constants
+const FREE_SHIPPING_THRESHOLD = 100000;
+const STORAGE_KEYS = {
+  CART: "cart",
+  SHIPPING_METHOD: "shippingMethod",
+  POSTAL_CODE: "postalCode",
+  SHIPPING_PRICE: "shippingPrice",
+  SHOULD_OPEN_CART: "shouldOpenCart",
+} as const;
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [shippingMethod, setShippingMethod] = useState<
-    "delivery" | "pickup" | null
-  >(null);
-  const [postalCode, setPostalCode] = useState<string>("");
-  const [shippingPrice, setShippingPrice] = useState<number>(0);
   const { toast } = useToast();
+  const [state, setState] = useState<CartState>({
+    items: [],
+    shippingMethod: null,
+    postalCode: "",
+    shippingPrice: 0,
+    shouldOpenCart: false,
+  });
 
-  const calculateShipping = async (code: string) => {
-    try {
-      const response = await fetch(`/api/shipping-costs/${code}`);
-      if (!response.ok) {
-        throw new Error("Código postal no encontrado");
-      }
-      const data = await response.json();
-      setShippingPrice(data.price);
-      setShippingMethod("delivery");
-    } catch (error) {
-      console.error("Error al calcular el envío:", error);
-      setShippingPrice(0);
-      setShippingMethod(null);
-    }
-  };
+  // Memoized values
+  const subtotal = useMemo(() => {
+    return state.items.reduce(
+      (total, item) => total + item.product.price * item.quantity,
+      0,
+    );
+  }, [state.items]);
 
-  // Load cart data from localStorage on mount
+  const isFreeShipping = useMemo(
+    () => subtotal >= FREE_SHIPPING_THRESHOLD,
+    [subtotal],
+  );
+
+  // Load initial state from localStorage
   useEffect(() => {
-    const savedCart = localStorage.getItem("cart");
-    const savedShippingMethod = localStorage.getItem("shippingMethod");
-    const savedPostalCode = localStorage.getItem("postalCode");
+    const loadState = () => {
+      try {
+        const savedCart = localStorage.getItem(STORAGE_KEYS.CART);
+        const savedShippingMethod = localStorage.getItem(
+          STORAGE_KEYS.SHIPPING_METHOD,
+        );
+        const savedPostalCode = localStorage.getItem(STORAGE_KEYS.POSTAL_CODE);
+        const savedShippingPrice = localStorage.getItem(
+          STORAGE_KEYS.SHIPPING_PRICE,
+        );
+        const savedShouldOpenCart = localStorage.getItem(
+          STORAGE_KEYS.SHOULD_OPEN_CART,
+        );
 
-    if (savedCart) {
-      setItems(JSON.parse(savedCart));
-    }
-    if (savedShippingMethod) {
-      setShippingMethod(savedShippingMethod as "delivery" | "pickup" | null);
-    }
-    if (savedPostalCode) {
-      setPostalCode(savedPostalCode);
-      // Calcular el envío automáticamente si hay un código postal guardado
-      calculateShipping(savedPostalCode);
-    }
+        const newState: Partial<CartState> = {};
+
+        if (savedCart) {
+          newState.items = JSON.parse(savedCart) as CartItem[];
+        }
+        if (savedShippingMethod) {
+          newState.shippingMethod = savedShippingMethod as ShippingMethod;
+        }
+        if (savedPostalCode) {
+          newState.postalCode = savedPostalCode;
+        }
+        if (savedShippingPrice) {
+          newState.shippingPrice = Number(savedShippingPrice);
+        }
+        if (savedShouldOpenCart) {
+          newState.shouldOpenCart = savedShouldOpenCart === "true";
+        }
+
+        setState((prev) => ({ ...prev, ...newState }));
+      } catch (error) {
+        console.error("Error loading cart state:", error);
+        toast({
+          title: "Error",
+          description: "No se pudo cargar el estado del carrito",
+          variant: "destructive",
+        });
+      }
+    };
+
+    loadState();
+  }, [toast]);
+
+  // Save state to localStorage
+  useEffect(() => {
+    const saveState = () => {
+      try {
+        localStorage.setItem(STORAGE_KEYS.CART, JSON.stringify(state.items));
+        if (state.shippingMethod) {
+          localStorage.setItem(
+            STORAGE_KEYS.SHIPPING_METHOD,
+            state.shippingMethod,
+          );
+        }
+        if (state.postalCode) {
+          localStorage.setItem(STORAGE_KEYS.POSTAL_CODE, state.postalCode);
+        }
+        if (state.shippingPrice > 0) {
+          localStorage.setItem(
+            STORAGE_KEYS.SHIPPING_PRICE,
+            state.shippingPrice.toString(),
+          );
+        }
+        localStorage.setItem(
+          STORAGE_KEYS.SHOULD_OPEN_CART,
+          state.shouldOpenCart.toString(),
+        );
+      } catch (error) {
+        console.error("Error saving cart state:", error);
+      }
+    };
+
+    saveState();
+  }, [state]);
+
+  // Memoized callbacks
+  const addToCart = useCallback(
+    (product: Product) => {
+      setState((prev) => {
+        const existingItem = prev.items.find(
+          (item) => item.product.id === product.id,
+        );
+        const newItems = existingItem
+          ? prev.items.map((item) =>
+              item.product.id === product.id
+                ? { ...item, quantity: item.quantity + 1 }
+                : item,
+            )
+          : [...prev.items, { product, quantity: 1 }];
+
+        return { ...prev, items: newItems, shouldOpenCart: true };
+      });
+
+      toast({
+        title: "Producto añadido",
+        description: `${product.name} ha sido añadido al carrito`,
+      });
+    },
+    [toast],
+  );
+
+  const removeFromCart = useCallback((productId: number) => {
+    setState((prev) => ({
+      ...prev,
+      items: prev.items.filter((item) => item.product.id !== productId),
+    }));
   }, []);
 
-  // Save cart data to localStorage whenever it changes
-  useEffect(() => {
-    localStorage.setItem("cart", JSON.stringify(items));
-  }, [items]);
-
-  // Save shipping method to localStorage whenever it changes
-  useEffect(() => {
-    if (shippingMethod) {
-      localStorage.setItem("shippingMethod", shippingMethod);
-    }
-  }, [shippingMethod]);
-
-  // Save postal code to localStorage whenever it changes
-  useEffect(() => {
-    if (postalCode) {
-      localStorage.setItem("postalCode", postalCode);
-    }
-  }, [postalCode]);
-
-  const addToCart = (product: Product) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find(
-        (item) => item.product.id === product.id,
-      );
-
-      if (existingItem) {
-        return prevItems.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item,
-        );
+  const updateQuantity = useCallback(
+    (productId: number, quantity: number) => {
+      if (quantity < 1) {
+        removeFromCart(productId);
+        return;
       }
 
-      return [...prevItems, { product, quantity: 1 }];
-    });
+      setState((prev) => ({
+        ...prev,
+        items: prev.items.map((item) =>
+          item.product.id === productId ? { ...item, quantity } : item,
+        ),
+      }));
+    },
+    [removeFromCart],
+  );
 
-    toast({
-      title: "Producto añadido",
-      description: `${product.name} ha sido añadido al carrito`,
-    });
-  };
+  const calculateShipping = useCallback(
+    async (code: string) => {
+      try {
+        const response = await fetch(`/api/shipping-costs/${code}`);
+        if (!response.ok) {
+          throw new Error("Código postal no encontrado");
+        }
+        const data = (await response.json()) as { price: number };
 
-  const removeFromCart = (productId: number) => {
-    setItems((prevItems) =>
-      prevItems.filter((item) => item.product.id !== productId),
-    );
-  };
+        setState((prev) => ({
+          ...prev,
+          shippingPrice: data.price,
+          shippingMethod: "delivery",
+        }));
+      } catch (error) {
+        console.error("Error al calcular el envío:", error);
+        setState((prev) => ({
+          ...prev,
+          shippingPrice: 0,
+          shippingMethod: null,
+        }));
+        toast({
+          title: "Error",
+          description: "No se pudo calcular el costo de envío",
+          variant: "destructive",
+        });
+      }
+    },
+    [toast],
+  );
 
-  const updateQuantity = (productId: number, quantity: number) => {
-    if (quantity < 1) {
-      removeFromCart(productId);
-      return;
-    }
-
-    setItems((prevItems) =>
-      prevItems.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item,
-      ),
-    );
-  };
-
-  const getTotal = () => {
-    return items.reduce((total, item) => {
-      if (!item?.product?.price) return total;
-      return total + item.product.price * item.quantity;
-    }, 0);
-  };
+  const contextValue = useMemo(
+    () => ({
+      ...state,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      getTotal: () => subtotal,
+      setShippingMethod: (method: ShippingMethod) =>
+        setState((prev) => ({ ...prev, shippingMethod: method })),
+      setPostalCode: (code: string) =>
+        setState((prev) => ({ ...prev, postalCode: code })),
+      setShippingPrice: (price: number) =>
+        setState((prev) => ({ ...prev, shippingPrice: price })),
+      setShouldOpenCart: (shouldOpen: boolean) =>
+        setState((prev) => ({ ...prev, shouldOpenCart: shouldOpen })),
+      calculateShipping,
+    }),
+    [
+      state,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      subtotal,
+      calculateShipping,
+    ],
+  );
 
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        getTotal,
-        shippingMethod,
-        setShippingMethod,
-        postalCode,
-        setPostalCode,
-        shippingPrice,
-        setShippingPrice,
-      }}
-    >
-      {children}
-    </CartContext.Provider>
+    <CartContext.Provider value={contextValue}>{children}</CartContext.Provider>
   );
 }
 
