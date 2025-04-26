@@ -2,10 +2,11 @@ import "@/styles/globals.css";
 
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
+import { CartProvider } from "./context/CartContext";
 
 export const metadata: Metadata = {
-  title: "NotChatbot Ecommerce",
-  description: "Aplicacion para el challenge tecnico de NotChatbot",
+  title: "NotChatbot Shop",
+  description: "Tu tienda online favorita",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -18,8 +19,10 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable}`}>
-      <body>{children}</body>
+    <html lang="es" className={`${geist.variable}`}>
+      <body>
+        <CartProvider>{children}</CartProvider>
+      </body>
     </html>
   );
 }

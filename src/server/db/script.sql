@@ -8,7 +8,10 @@ VALUES
   ('Mochila Urbana', 'Mochila compacta con espacio para notebook', 21999, 'https://res.cloudinary.com/dfdvxotjz/image/upload/v1745355844/notchatbot-images/fmy92chhvfcmh27htw8t.png'),
   ('Jean Slim Fit', 'Jean de corte ajustado con lavado moderno', 18999, 'https://res.cloudinary.com/dfdvxotjz/image/upload/v1745356012/notchatbot-images/xxhgpkgrebofvy0ipemh.webp'),
   ('Camisa Cuadros', 'Camisa clásica para uso casual', 15999, 'https://res.cloudinary.com/dfdvxotjz/image/upload/v1745356088/notchatbot-images/tnteum5nnlozwifa2auj.webp'),
-  ('Medias Deportivas (x3)', 'Pack de 3 pares de medias deportivas', 4999, 'https://res.cloudinary.com/dfdvxotjz/image/upload/v1745356166/notchatbot-images/dpu4qolhxvmkhmqmigjn.webp');
+  ('Medias Deportivas (x3)', 'Pack de 3 pares de medias deportivas', 4999, 'https://res.cloudinary.com/dfdvxotjz/image/upload/v1745356166/notchatbot-images/dpu4qolhxvmkhmqmigjn.webp'),
+  ('Campera de Jean', 'Campera clásica de jean para entretiempo', 29999, 'https://res.cloudinary.com/dfdvxotjz/image/upload/v1745595783/notchatbot-images/shwnb5vpndoe6qw5nerl.jpg'),
+  ('Zapatillas Running', 'Zapatillas deportivas para correr', 39999, 'https://res.cloudinary.com/dfdvxotjz/image/upload/v1745595811/notchatbot-images/ttilph6cli7ypkm3mxc0.jpg'),
+  ('Riñonera Urbana', 'Riñonera práctica para uso diario', 9999, 'https://res.cloudinary.com/dfdvxotjz/image/upload/v1745595836/notchatbot-images/tid6r4eoo0zza8lymf5s.jpg');
 
 INSERT INTO shipping_costs (postal_code, price) VALUES
   ('1000', 1500),
