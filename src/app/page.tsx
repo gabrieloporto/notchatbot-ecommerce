@@ -20,8 +20,8 @@ async function getProducts(): Promise<Product[]> {
     throw new Error("Failed to fetch products");
   }
 
-  const data = await res.json();
-  return data as Product[];
+  const data = (await res.json()) as Product[];
+  return data;
 }
 
 export default async function HomePage() {
