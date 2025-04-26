@@ -5,8 +5,10 @@ import { ShoppingCart, Check } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import Link from "next/link";
 import { formatPrice } from "@/utils/formatPrice";
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
+import Image from "next/image";
 
+// Types
 interface Product {
   id: number;
   name: string;
@@ -20,11 +22,17 @@ interface ProductCardProps {
   onAddToCart?: () => void;
 }
 
-export function ProductCard({ product, onAddToCart }: ProductCardProps) {
+// Constants
+const ADD_TO_CART_TIMEOUT = 2000;
+
+export const ProductCard = memo(function ProductCard({
+  product,
+  onAddToCart,
+}: ProductCardProps) {
   const { addToCart } = useCart();
   const [isAdded, setIsAdded] = useState(false);
 
-  const handleAddToCart = () => {
+  const handleAddToCart = useCallback(() => {
     addToCart(product);
     setIsAdded(true);
 
@@ -32,19 +40,25 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       onAddToCart();
     }
 
-    // Reset the button state after 2 seconds
-    setTimeout(() => {
+    // Reset the button state after timeout
+    const timeoutId = setTimeout(() => {
       setIsAdded(false);
-    }, 2000);
-  };
+    }, ADD_TO_CART_TIMEOUT);
+
+    return () => clearTimeout(timeoutId);
+  }, [addToCart, product, onAddToCart]);
 
   return (
     <div className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-all duration-300 hover:shadow-lg">
       <div className="aspect-square w-full overflow-hidden bg-gray-100">
-        <img
+        <Image
           src={product.image}
           alt={product.name}
+          width={500}
+          height={500}
           className="h-full w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+          priority={false}
+          loading="lazy"
         />
       </div>
 
@@ -54,6 +68,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
             <Link
               href={`/products/${product.id}`}
               className="hover:text-primary transition-colors"
+              prefetch={false}
             >
               {product.name}
             </Link>
@@ -77,6 +92,7 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
           } cursor-pointer`}
           onClick={handleAddToCart}
           disabled={isAdded}
+          aria-label={isAdded ? "Producto agregado" : "Agregar al carrito"}
         >
           {isAdded ? (
             <>
@@ -93,4 +109,4 @@ export function ProductCard({ product, onAddToCart }: ProductCardProps) {
       </div>
     </div>
   );
-}
+});
