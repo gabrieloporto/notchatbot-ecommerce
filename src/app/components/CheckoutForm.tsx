@@ -85,36 +85,6 @@ type FormData = z.infer<typeof formSchema>;
 const FREE_SHIPPING_THRESHOLD = 100000;
 const SHIPPING_API_ENDPOINT = "/api/shipping-costs";
 
-// Memoized Input Component
-const FormInput = memo(function FormInput({
-  name,
-  type = "text",
-  value,
-  onChange,
-  placeholder,
-  required = false,
-}: {
-  name: keyof FormData;
-  type?: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  placeholder: string;
-  required?: boolean;
-}) {
-  return (
-    <Input
-      name={name}
-      type={type}
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      required={required}
-      className="focus:border-primary focus:ring-primary border-gray-400"
-      aria-label={placeholder}
-    />
-  );
-});
-
 export const CheckoutForm = memo(function CheckoutForm() {
   const {
     shippingMethod,
