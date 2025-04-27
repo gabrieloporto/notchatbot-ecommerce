@@ -176,7 +176,6 @@ export const CheckoutForm = memo(function CheckoutForm() {
       safeSubtotal + (shippingMethod === "delivery" ? safeShippingPrice : 0);
 
     try {
-      // Guardar el email en localStorage
       localStorage.setItem("userEmail", data.email);
 
       const response = await fetch("/api/orders", {
