@@ -33,7 +33,7 @@ export default function SuccessPage() {
     if (orderId) {
       fetch(`/api/orders/${orderId}`)
         .then((res) => res.json())
-        .then((data) => setOrder(data))
+        .then((data) => setOrder(data as Order))
         .catch((error) => console.error("Error fetching order:", error));
     }
   }, [orderId]);
