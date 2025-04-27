@@ -44,6 +44,7 @@ interface CartContextType extends CartState {
   setShippingPrice: (price: number) => void;
   calculateShipping: (code: string) => Promise<void>;
   setShouldOpenCart: (shouldOpen: boolean) => void;
+  clearCart: () => void;
 }
 
 // Constants
@@ -236,6 +237,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [toast],
   );
 
+  const clearCart = useCallback(() => {
+    setState((prev) => ({
+      ...prev,
+      items: [],
+      shippingMethod: null,
+      postalCode: "",
+      shippingPrice: 0,
+      shouldOpenCart: false,
+    }));
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       ...state,
@@ -252,6 +264,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setShouldOpenCart: (shouldOpen: boolean) =>
         setState((prev) => ({ ...prev, shouldOpenCart: shouldOpen })),
       calculateShipping,
+      clearCart,
     }),
     [
       state,
@@ -260,6 +273,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       updateQuantity,
       subtotal,
       calculateShipping,
+      clearCart,
     ],
   );
 

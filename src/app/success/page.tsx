@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { OrderModal } from "../components/OrderModal";
+import { useCart } from "../context/CartContext"; // Agrega este import
 
 interface Order {
   id: number;
@@ -28,6 +29,7 @@ export default function SuccessPage() {
   const orderId = searchParams.get("orderId");
   const [order, setOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(true);
+  const { clearCart } = useCart(); // Usa el hook
 
   useEffect(() => {
     if (orderId) {
@@ -83,7 +85,13 @@ export default function SuccessPage() {
           >
             Ver detalles de la orden
           </Button>
-          <Button onClick={() => router.push("/")} className="w-full">
+          <Button
+            onClick={() => {
+              clearCart();
+              router.push("/");
+            }}
+            className="w-full"
+          >
             Volver al inicio
           </Button>
         </div>
