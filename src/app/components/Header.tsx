@@ -5,17 +5,12 @@ import { ShoppingCart } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import Link from "next/link";
 import { CartModal } from "./CartModal";
-import { useState, useEffect, useCallback, memo, useMemo, useRef } from "react";
-import Image from "next/image";
+import { useState, useEffect, useCallback, memo, useMemo } from "react";
 
 // Types
 interface HeaderProps {
   onCartOpen?: () => void;
 }
-
-// Constants
-const CART_ICON_SIZE = 20;
-const BADGE_SIZE = 20;
 
 // Memoized Cart Badge Component
 const CartBadge = memo(function CartBadge({ count }: { count: number }) {
@@ -34,7 +29,6 @@ const CartBadge = memo(function CartBadge({ count }: { count: number }) {
 export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
   const { items, shouldOpenCart, setShouldOpenCart } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const initialItemsCount = useRef(items.length);
 
   // Memoized calculations
   const totalItems = useMemo(
