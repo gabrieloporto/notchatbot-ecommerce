@@ -5,8 +5,11 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } },
+  context: { params: { id: string } } | { params: Promise<{ id: string }> },
 ) {
+  // Espera a que params esté disponible si es una promesa
+  const params = await context.params;
+
   try {
     const order = await db
       .select()
