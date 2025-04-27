@@ -25,6 +25,23 @@ interface CartItem {
   quantity: number;
 }
 
+interface Order {
+  id: number;
+  customerName: string;
+  total: number;
+  status: string;
+  createdAt: string;
+  items: Array<{
+    product: {
+      id: number;
+      name: string;
+      price: number;
+      image: string;
+    };
+    quantity: number;
+  }>;
+}
+
 interface CartModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -117,6 +134,8 @@ export const CartModal = memo(function CartModal({
 
   const [isCalculating, setIsCalculating] = useState(false);
   const [showPostalCodeInput, setShowPostalCodeInput] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   // Memoized calculations
   const subtotal = getTotal();
@@ -183,6 +202,19 @@ export const CartModal = memo(function CartModal({
       document.body.style.overflow = "unset";
     };
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    // Fetch user orders when modal opens
+    if (isOpen) {
+      const userEmail = localStorage.getItem("userEmail");
+      if (userEmail) {
+        fetch(`/api/orders?email=${userEmail}`)
+          .then((res) => res.json())
+          .then((data: Order[]) => setOrders(data))
+          .catch((error) => console.error("Error fetching orders:", error));
+      }
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -334,13 +366,89 @@ export const CartModal = memo(function CartModal({
               </div>
 
               {/* Checkout Button */}
-              <Button className="mt-4 w-full" asChild>
-                <Link href="/checkout">Proceder al pago</Link>
-              </Button>
+              <div className="mt-6 space-y-4">
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => setIsOrderModalOpen(true)}
+                >
+                  Ver mis órdenes
+                </Button>
+                <Button className="w-full" asChild>
+                  <Link href="/checkout">Proceder al pago</Link>
+                </Button>
+              </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* Order Modal */}
+      {isOrderModalOpen && (
+        <div className="fixed inset-0 z-50">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 ease-in-out"
+            onClick={() => setIsOrderModalOpen(false)}
+            role="presentation"
+          />
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <div className="w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 shadow-xl transition-all">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-semibold">Mis órdenes</h2>
+                  <button
+                    onClick={() => setIsOrderModalOpen(false)}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <div className="mt-4 space-y-4">
+                  {orders.length === 0 ? (
+                    <p className="text-center text-gray-500">
+                      No tienes órdenes aún
+                    </p>
+                  ) : (
+                    orders.map((order) => (
+                      <div key={order.id} className="rounded-md border p-4">
+                        <div className="space-y-2">
+                          <p className="text-sm">
+                            <span className="font-medium">Orden #:</span>{" "}
+                            {order.id}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">Fecha:</span>{" "}
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">Total:</span>{" "}
+                            {formatPrice(order.total)}
+                          </p>
+                          <p className="text-sm">
+                            <span className="font-medium">Estado:</span>{" "}
+                            <span
+                              className={
+                                order.status === "pending"
+                                  ? "text-yellow-600"
+                                  : "text-green-600"
+                              }
+                            >
+                              {order.status === "pending"
+                                ? "Pendiente"
+                                : "Completada"}
+                            </span>
+                          </p>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });
