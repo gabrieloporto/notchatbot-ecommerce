@@ -164,6 +164,17 @@ export const CheckoutForm = memo(function CheckoutForm() {
       return;
     }
 
+    const safeShippingPrice =
+      shippingMethod === "delivery"
+        ? Number.isFinite(shippingPrice) && shippingPrice > 0
+          ? Number(shippingPrice)
+          : 0
+        : 0;
+
+    const safeSubtotal = Number(getTotal()) || 0;
+    const safeTotal =
+      safeSubtotal + (shippingMethod === "delivery" ? safeShippingPrice : 0);
+
     try {
       // Guardar el email en localStorage
       localStorage.setItem("userEmail", data.email);
@@ -177,9 +188,8 @@ export const CheckoutForm = memo(function CheckoutForm() {
           ...data,
           shippingMethod,
           shippingPrice,
-          subtotal: getTotal(),
-          total:
-            getTotal() + (shippingMethod === "delivery" ? shippingPrice : 0),
+          subtotal: safeSubtotal,
+          total: safeTotal,
           items: items,
         }),
       });
