@@ -47,7 +47,6 @@ interface CartContextType extends CartState {
 }
 
 // Constants
-const FREE_SHIPPING_THRESHOLD = 100000;
 const STORAGE_KEYS = {
   CART: "cart",
   SHIPPING_METHOD: "shippingMethod",
@@ -75,11 +74,6 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       0,
     );
   }, [state.items]);
-
-  const isFreeShipping = useMemo(
-    () => subtotal >= FREE_SHIPPING_THRESHOLD,
-    [subtotal],
-  );
 
   // Load initial state from localStorage
   useEffect(() => {
