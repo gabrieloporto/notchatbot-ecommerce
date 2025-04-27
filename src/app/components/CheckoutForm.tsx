@@ -188,7 +188,34 @@ export const CheckoutForm = memo(function CheckoutForm() {
         throw new Error("Error al crear la orden");
       }
 
-      const order = await response.json();
+      // Define the expected structure of the order object
+      interface Order {
+        id: number;
+        customerEmail: string;
+        customerName: string;
+        customerPhone: string;
+        shippingAddress: string;
+        shippingCity: string;
+        shippingProvince: string;
+        shippingPostalCode?: string;
+        shippingMethod: string;
+        shippingPrice: number;
+        subtotal: number;
+        total: number;
+        status: string;
+        createdAt: string;
+        items: Array<{
+          product: {
+            id: number;
+            name: string;
+            price: number;
+            image: string;
+          };
+          quantity: number;
+        }>;
+      }
+
+      const order = (await response.json()) as Order;
       router.push(`/success?orderId=${order.id}`);
     } catch (error) {
       console.error("Error al crear la orden:", error);
