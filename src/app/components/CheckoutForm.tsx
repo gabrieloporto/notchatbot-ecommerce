@@ -18,6 +18,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useRouter } from "next/navigation";
 
 // Zod Schema
 const formSchema = z.object({
@@ -94,7 +95,9 @@ export const CheckoutForm = memo(function CheckoutForm() {
     setShippingPrice,
     shippingPrice,
     getTotal,
+    items,
   } = useCart();
+  const router = useRouter();
 
   const [isCalculating, setIsCalculating] = useState(false);
   const [showPostalCodeInput, setShowPostalCodeInput] = useState(false);
@@ -161,8 +164,38 @@ export const CheckoutForm = memo(function CheckoutForm() {
       return;
     }
 
-    // Here you would typically send the order to your backend
-    console.log("Form submitted:", data);
+    try {
+      // Guardar el email en localStorage
+      localStorage.setItem("userEmail", data.email);
+
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...data,
+          shippingMethod,
+          shippingPrice,
+          subtotal: getTotal(),
+          total:
+            getTotal() + (shippingMethod === "delivery" ? shippingPrice : 0),
+          items: items,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al crear la orden");
+      }
+
+      const order = await response.json();
+      router.push(`/success?orderId=${order.id}`);
+    } catch (error) {
+      console.error("Error al crear la orden:", error);
+      form.setError("root", {
+        message: "Error al crear la orden. Por favor intenta nuevamente.",
+      });
+    }
   };
 
   return (
