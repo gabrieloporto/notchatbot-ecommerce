@@ -101,7 +101,7 @@ No se incluye integración con medios de pago ni backoffice para la carga de pro
 1. **Clonar el repositorio:**
 
    ```sh
-   git clone <repo-url>
+   git clone https://github.com/gabrieloporto/notchatbot-ecommerce
    cd notchatbot-ecommerce
    ```
 
