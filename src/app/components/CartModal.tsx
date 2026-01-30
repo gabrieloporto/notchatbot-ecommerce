@@ -18,6 +18,7 @@ interface Product {
   description: string;
   price: number;
   image: string;
+  stock: number;
 }
 
 interface CartItem {
@@ -79,8 +80,9 @@ const CartItem = memo(function CartItem({
           variant="outline"
           size="sm"
           onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
-          className="cursor-pointer transition-colors hover:bg-gray-100"
+          className="cursor-pointer transition-colors hover:bg-gray-100 disabled:opacity-50"
           aria-label="Aumentar cantidad"
+          disabled={item.quantity >= item.product.stock}
         >
           +
         </Button>
