@@ -8,6 +8,7 @@ interface Product {
   description: string;
   price: number;
   image: string;
+  stock: number;
 }
 
 async function getProducts(category?: string): Promise<Product[]> {
@@ -41,7 +42,7 @@ export default async function HomePage(props: {
       <ShippingBanner />
       <Header />
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-12">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
             {searchParams.category ? decodeURIComponent(searchParams.category) : "Productos Destacados"}
