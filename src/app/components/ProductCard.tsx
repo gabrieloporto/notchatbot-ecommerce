@@ -15,6 +15,7 @@ interface Product {
   description: string;
   price: number;
   image: string;
+  stock: number;
 }
 
 interface ProductCardProps {
@@ -31,8 +32,11 @@ export const ProductCard = memo(function ProductCard({
 }: ProductCardProps) {
   const { addToCart } = useCart();
   const [isAdded, setIsAdded] = useState(false);
+  const hasStock = product.stock > 0;
 
   const handleAddToCart = useCallback(() => {
+    if (!hasStock) return;
+    
     addToCart(product);
     setIsAdded(true);
 
@@ -46,7 +50,7 @@ export const ProductCard = memo(function ProductCard({
     }, ADD_TO_CART_TIMEOUT);
 
     return () => clearTimeout(timeoutId);
-  }, [addToCart, product, onAddToCart]);
+  }, [addToCart, product, onAddToCart, hasStock]);
 
   return (
     <div className="group relative flex h-full cursor-pointer flex-col overflow-hidden rounded-lg border border-gray-200 bg-white transition-all duration-300 hover:shadow-lg">
@@ -88,17 +92,27 @@ export const ProductCard = memo(function ProductCard({
           className={`w-full transition-colors ${
             isAdded
               ? "border-2 border-green-400 bg-green-50 text-green-600 hover:bg-green-50"
-              : "hover:bg-primary/90"
+              : hasStock 
+                ? "hover:bg-primary/90" 
+                : "bg-gray-300 cursor-not-allowed hover:bg-gray-300"
           } cursor-pointer`}
           onClick={handleAddToCart}
-          disabled={isAdded}
-          aria-label={isAdded ? "Producto agregado" : "Agregar al carrito"}
+          disabled={isAdded || !hasStock}
+          aria-label={
+            !hasStock 
+              ? "Sin stock" 
+              : isAdded 
+                ? "Producto agregado" 
+                : "Agregar al carrito"
+          }
         >
           {isAdded ? (
             <>
               <Check className="mr-2 h-4 w-4" />
               Listo
             </>
+          ) : !hasStock ? (
+             "Sin Stock"
           ) : (
             <>
               <ShoppingCart className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
