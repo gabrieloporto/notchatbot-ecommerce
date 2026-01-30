@@ -5,6 +5,9 @@ import { ShoppingCart } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import Link from "next/link";
 import { CartModal } from "./CartModal";
+import { ProductSearch } from "./ProductSearch";
+import { CategoryNav } from "./CategoryNav";
+import { MobileNav } from "./MobileNav";
 import { useState, useEffect, useCallback, memo, useMemo } from "react";
 
 // Types
@@ -72,7 +75,11 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
             </span>
           </Link>
 
-          <div className="flex items-center">
+          {/* Desktop Navigation - Hidden on Mobile */}
+          <CategoryNav className="hidden md:flex mx-6" />
+
+          <div className="flex items-center space-x-4">
+            <ProductSearch />
             <Button
               variant="ghost"
               size="icon"
@@ -84,6 +91,7 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
               <ShoppingCart className="h-5 w-5" />
               <CartBadge count={totalItems} />
             </Button>
+            <MobileNav />
           </div>
         </div>
       </header>
