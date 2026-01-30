@@ -17,6 +17,7 @@ interface Product {
   description: string;
   price: number;
   image: string;
+  stock: number;
 }
 
 interface CartItem {
@@ -163,6 +164,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const existingItem = prev.items.find(
           (item) => item.product.id === product.id,
         );
+        
+        // Verificación de stock para nuevo item o incremento
+        const currentQty = existingItem ? existingItem.quantity : 0;
+        
+        if (currentQty + 1 > product.stock) {
+             toast({
+              title: "Stock insuficiente",
+              description: `Solo hay ${product.stock} unidades disponibles de ${product.name}`,
+              variant: "destructive",
+            });
+            return prev;
+        }
+
         const newItems = existingItem
           ? prev.items.map((item) =>
               item.product.id === product.id
@@ -170,13 +184,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 : item,
             )
           : [...prev.items, { product, quantity: 1 }];
+        
+        // Show success toast only if added
+        toast({
+            title: "Producto añadido",
+            description: `${product.name} ha sido añadido al carrito`,
+        });
 
         return { ...prev, items: newItems, shouldOpenCart: true };
-      });
-
-      toast({
-        title: "Producto añadido",
-        description: `${product.name} ha sido añadido al carrito`,
       });
     },
     [toast],
@@ -196,14 +211,27 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      setState((prev) => ({
-        ...prev,
-        items: prev.items.map((item) =>
-          item.product.id === productId ? { ...item, quantity } : item,
-        ),
-      }));
+      setState((prev) => {
+         const itemToUpdate = prev.items.find((item) => item.product.id === productId);
+         
+         if (itemToUpdate && quantity > itemToUpdate.product.stock) {
+             toast({
+                title: "Stock máximo alcanzado",
+                description: `No puedes agregar más de ${itemToUpdate.product.stock} unidades`,
+                variant: "destructive",
+            });
+             return prev;
+         }
+
+         return {
+            ...prev,
+            items: prev.items.map((item) =>
+              item.product.id === productId ? { ...item, quantity } : item,
+            ),
+         }
+      });
     },
-    [removeFromCart],
+    [removeFromCart, toast],
   );
 
   const calculateShipping = useCallback(
