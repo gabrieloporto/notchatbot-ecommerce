@@ -84,7 +84,7 @@ export const ProductCard = memo(function ProductCard({
 
         <Button
           variant={isAdded ? "outline" : "default"}
-          size="sm"
+          size="lg"
           className={`w-full transition-colors ${
             isAdded
               ? "border-2 border-green-400 bg-green-50 text-green-600 hover:bg-green-50"
