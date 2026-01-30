@@ -67,11 +67,11 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link
             href="/"
-            className="focus:ring-primary flex items-center space-x-2 rounded-md focus:ring-2 focus:ring-offset-2 focus:outline-none"
+            className="focus:ring-primary flex items-left space-x-2 rounded-md focus:ring-2 focus:ring-offset-2 focus:outline-none text-xl font-bold tracking-tight flex-col"
             aria-label="Ir a la página principal"
           >
-            <span className="text-xl font-bold tracking-tight">
-              NotChatbot <span className="text-primary">Store</span>
+            <span>
+              NexoShop
             </span>
           </Link>
 
