@@ -10,9 +10,15 @@ interface Product {
   image: string;
 }
 
-async function getProducts(): Promise<Product[]> {
+async function getProducts(category?: string): Promise<Product[]> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const res = await fetch(`${baseUrl}/api/products`, {
+  const url = new URL(`${baseUrl}/api/products`);
+  
+  if (category) {
+    url.searchParams.set("category", category);
+  }
+
+  const res = await fetch(url.toString(), {
     cache: "no-store",
   });
 
@@ -24,8 +30,11 @@ async function getProducts(): Promise<Product[]> {
   return data;
 }
 
-export default async function HomePage() {
-  const products = await getProducts();
+export default async function HomePage(props: {
+  searchParams: Promise<{ category?: string }>;
+}) {
+  const searchParams = await props.searchParams;
+  const products = await getProducts(searchParams.category);
 
   return (
     <div className="min-h-screen bg-white">
@@ -35,7 +44,7 @@ export default async function HomePage() {
       <main className="container mx-auto px-4 py-8">
         <div className="mb-12">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
-            Productos Destacados
+            {searchParams.category ? decodeURIComponent(searchParams.category) : "Productos Destacados"}
           </h1>
           <p className="mt-2 text-base text-gray-600">
             Descubre nuestra selección de productos más populares
