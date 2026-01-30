@@ -1,4 +1,4 @@
-# NotChatbot Store – Mini Ecommerce Challenge
+# NexoShop – Mini Ecommerce Challenge
 
 Este proyecto es una aplicación de ecommerce desarrollada como parte de la **Prueba Técnica NotChatbot**. El objetivo principal es evaluar la experiencia de usuario (UX) y la funcionalidad del checkout, especialmente el cálculo dinámico del costo de envío según el código postal (CP).
 
@@ -6,7 +6,7 @@ Este proyecto es una aplicación de ecommerce desarrollada como parte de la **Pr
 
 ## 🛒 Descripción General
 
-**NotChatbot Store** es un mini ecommerce donde los usuarios pueden:
+**NexoShop** es un mini ecommerce donde los usuarios pueden:
 
 - Visualizar productos cargados en una base de datos PostgreSQL.
 - Agregar productos al carrito.
