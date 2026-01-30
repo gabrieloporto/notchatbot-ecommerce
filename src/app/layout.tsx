@@ -5,8 +5,8 @@ import { Geist } from "next/font/google";
 import { CartProvider } from "./context/CartContext";
 
 export const metadata: Metadata = {
-  title: "NotChatbot Shop",
-  description: "Tu tienda online favorita",
+  title: "NexoShop",
+  description: "Tu tienda online",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
