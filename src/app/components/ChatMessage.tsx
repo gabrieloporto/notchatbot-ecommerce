@@ -21,14 +21,14 @@ export default function ChatMessage({ message }: ChatMessageProps) {
       <div
         className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
           isUser
-            ? "bg-gradient-to-br from-purple-500 to-blue-500"
-            : "bg-gray-700"
+            ? "bg-black"
+            : "bg-gray-200 dark:bg-gray-800"
         }`}
       >
         {isUser ? (
           <User className="w-4 h-4 text-white" />
         ) : (
-          <Bot className="w-4 h-4 text-purple-300" />
+          <Bot className="w-4 h-4 text-gray-900 dark:text-gray-100" />
         )}
       </div>
 
@@ -38,8 +38,8 @@ export default function ChatMessage({ message }: ChatMessageProps) {
         <div
           className={`px-4 py-3 rounded-2xl max-w-[85%] ${
             isUser
-              ? "bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-br-sm"
-              : "bg-gray-800/50 text-gray-100 rounded-bl-sm"
+              ? "bg-black text-white rounded-br-sm"
+              : "bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-800 rounded-bl-sm"
           }`}
         >
           <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
