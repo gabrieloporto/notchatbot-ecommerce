@@ -3,6 +3,9 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { Geist } from "next/font/google";
 import { CartProvider } from "./context/CartContext";
+import { ChatProvider } from "./context/ChatContext";
+import { Toaster } from "@/components/ui/toaster";
+import ChatWidget from "./components/ChatWidget";
 
 export const metadata: Metadata = {
   title: "NexoShop",
@@ -21,7 +24,13 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${geist.variable}`}>
       <body>
-        <CartProvider>{children}</CartProvider>
+        <CartProvider>
+          <ChatProvider>
+            {children}
+            <ChatWidget />
+            <Toaster />
+          </ChatProvider>
+        </CartProvider>
       </body>
     </html>
   );
