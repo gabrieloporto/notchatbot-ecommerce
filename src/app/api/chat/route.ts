@@ -68,9 +68,29 @@ export async function POST(request: Request) {
 
     console.log("✅ Respuesta generada con Gemini");
 
+    // PASO 3: Filtrar productos mencionados en la respuesta
+    // Solo mostrar productos que realmente se mencionan en el texto de respuesta
+    const mentionedProducts = relevantProducts.filter(product => {
+      // Normalizar nombres para comparación (sin acentos, minúsculas)
+      const normalizedResponse = response
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+      
+      const normalizedProductName = product.name
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+
+      // Verificar si el nombre del producto está en la respuesta
+      return normalizedResponse.includes(normalizedProductName);
+    });
+
+    console.log(`✅ Productos mencionados en respuesta: ${mentionedProducts.length}`);
+
     return NextResponse.json({
       message: response,
-      products: relevantProducts,
+      products: mentionedProducts, // Solo productos mencionados
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
