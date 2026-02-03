@@ -1,4 +1,4 @@
-import { ProductCard } from "./components/ProductCard";
+import ProductCard from "./components/ProductCard";
 import { Header } from "./components/Header";
 import { ShippingBanner } from "./components/ShippingBanner";
 
@@ -9,6 +9,7 @@ interface Product {
   price: number;
   image: string;
   stock: number;
+  category: string;
 }
 
 async function getProducts(category?: string): Promise<Product[]> {
