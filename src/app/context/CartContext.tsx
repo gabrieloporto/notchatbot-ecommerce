@@ -40,6 +40,7 @@ interface CartContextType extends CartState {
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   getTotal: () => number;
+  getProductQuantity: (productId: number) => number;
   setShippingMethod: (method: ShippingMethod) => void;
   setPostalCode: (code: string) => void;
   setShippingPrice: (price: number) => void;
@@ -169,12 +170,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         const currentQty = existingItem ? existingItem.quantity : 0;
         
         if (currentQty + 1 > product.stock) {
-             toast({
-              title: "Stock insuficiente",
-              description: `Solo hay ${product.stock} unidades disponibles de ${product.name}`,
-              variant: "destructive",
-            });
-            return prev;
+          return prev; // No modificar estado si no hay stock
         }
 
         const newItems = existingItem
@@ -184,17 +180,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
                 : item,
             )
           : [...prev.items, { product, quantity: 1 }];
-        
-        // Show success toast only if added
-        toast({
-            title: "Producto añadido",
-            description: `${product.name} ha sido añadido al carrito`,
-        });
 
         return { ...prev, items: newItems, shouldOpenCart: true };
       });
     },
-    [toast],
+    [],
   );
 
   const removeFromCart = useCallback((productId: number) => {
@@ -215,12 +205,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
          const itemToUpdate = prev.items.find((item) => item.product.id === productId);
          
          if (itemToUpdate && quantity > itemToUpdate.product.stock) {
-             toast({
-                title: "Stock máximo alcanzado",
-                description: `No puedes agregar más de ${itemToUpdate.product.stock} unidades`,
-                variant: "destructive",
-            });
-             return prev;
+             return prev; // No modificar si excede stock
          }
 
          return {
@@ -282,7 +267,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addToCart,
       removeFromCart,
       updateQuantity,
-      getTotal: () => subtotal,
+      getTotal: () => subtotal + state.shippingPrice,
+      getProductQuantity: (productId: number) => {
+        const item = state.items.find((item) => item.product.id === productId);
+        return item ? item.quantity : 0;
+      },
       setShippingMethod: (method: ShippingMethod) =>
         setState((prev) => ({ ...prev, shippingMethod: method })),
       setPostalCode: (code: string) =>
