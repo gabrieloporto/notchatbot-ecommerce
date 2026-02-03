@@ -170,7 +170,7 @@ export default function ProductPage({ params }: ProductPageProps) {
           <div className="flex flex-col">
             {/* Categoría */}
             <div className="mb-4">
-              <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded-full border border-gray-200 uppercase text-xs">
+              <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-xs font-medium rounded-full border border-gray-200 uppercase">
                 {product.category}
               </span>
             </div>
