@@ -1,11 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Search } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import Link from "next/link";
 import { CartModal } from "./CartModal";
 import { ProductSearch } from "./ProductSearch";
+import { SearchModal } from "./SearchModal";
 import { CategoryNav } from "./CategoryNav";
 import { MobileNav } from "./MobileNav";
 import { useState, useEffect, useCallback, memo, useMemo } from "react";
@@ -32,6 +33,7 @@ const CartBadge = memo(function CartBadge({ count }: { count: number }) {
 export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
   const { items, shouldOpenCart, setShouldOpenCart } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   // Memoized calculations
   const totalItems = useMemo(
@@ -50,6 +52,14 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
     setIsCartOpen(false);
     setShouldOpenCart(false);
   }, [setShouldOpenCart]);
+
+  const handleSearchOpen = useCallback(() => {
+    setIsSearchOpen(true);
+  }, []);
+
+  const handleSearchClose = useCallback(() => {
+    setIsSearchOpen(false);
+  }, []);
 
   // Effects
   useEffect(() => {
@@ -79,7 +89,23 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
           <CategoryNav className="hidden md:flex mx-6" />
 
           <div className="flex items-center space-x-4">
-            <ProductSearch />
+            {/* Desktop Search - Hidden on Mobile/Tablet */}
+            <div className="hidden lg:block">
+              <ProductSearch />
+            </div>
+
+            {/* Mobile Search Icon - Shown on Mobile/Tablet */}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden h-9 w-9 cursor-pointer transition-colors hover:bg-gray-100"
+              onClick={handleSearchOpen}
+              aria-label="Abrir búsqueda"
+            >
+              <Search className="h-5 w-5" />
+            </Button>
+
+            {/* Cart Icon - Always visible */}
             <Button
               variant="ghost"
               size="icon"
@@ -97,6 +123,7 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
       </header>
 
       <CartModal isOpen={isCartOpen} onClose={handleCartClose} />
+      <SearchModal isOpen={isSearchOpen} onClose={handleSearchClose} />
     </>
   );
 });
