@@ -6,6 +6,8 @@ import { CartProvider } from "./context/CartContext";
 import { ChatProvider } from "./context/ChatContext";
 import { Toaster } from "@/components/ui/toaster";
 import ChatWidget from "./components/ChatWidget";
+import { Header } from "./components/Header";
+import { ShippingBanner } from "./components/ShippingBanner";
 
 export const metadata: Metadata = {
   title: "NexoShop",
@@ -26,6 +28,8 @@ export default function RootLayout({
       <body>
         <CartProvider>
           <ChatProvider>
+            <ShippingBanner />
+            <Header />
             {children}
             <ChatWidget />
             <Toaster />

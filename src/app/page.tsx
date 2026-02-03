@@ -1,6 +1,4 @@
 import ProductCard from "./components/ProductCard";
-import { Header } from "./components/Header";
-import { ShippingBanner } from "./components/ShippingBanner";
 
 interface Product {
   id: number;
@@ -40,9 +38,6 @@ export default async function HomePage(props: {
 
   return (
     <div className="min-h-screen bg-white">
-      <ShippingBanner />
-      <Header />
-
       <main className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-12">
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">
