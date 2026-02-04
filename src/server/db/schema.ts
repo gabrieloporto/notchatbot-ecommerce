@@ -8,7 +8,6 @@ import {
   jsonb,
 } from "drizzle-orm/pg-core";
 
-
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -19,12 +18,10 @@ export const products = pgTable("products", {
   stock: integer("stock").notNull().default(10),
 });
 
-
 export const shippingCosts = pgTable("shipping_costs", {
   postalCode: text("postal_code").primaryKey(),
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
 });
-
 
 export const orders = pgTable("orders", {
   id: serial("id").primaryKey(), 
