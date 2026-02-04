@@ -33,6 +33,7 @@ interface CartState {
   postalCode: string;
   shippingPrice: number;
   shouldOpenCart: boolean;
+  isCartModalOpen: boolean; // Nuevo estado
 }
 
 interface CartContextType extends CartState {
@@ -47,6 +48,7 @@ interface CartContextType extends CartState {
   calculateShipping: (code: string) => Promise<void>;
   setShouldOpenCart: (shouldOpen: boolean) => void;
   clearCart: () => void;
+  setIsCartModalOpen: (open: boolean) => void; // Nuevo setter
 }
 
 // Constants
@@ -68,6 +70,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     postalCode: "",
     shippingPrice: 0,
     shouldOpenCart: false,
+    isCartModalOpen: false, // Inicializar nuevo estado
   });
 
   // Memoized values
@@ -251,15 +254,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [toast],
   );
 
+   // Memoized clear cart function
   const clearCart = useCallback(() => {
-    setState((prev) => ({
-      ...prev,
+    setState({
       items: [],
       shippingMethod: null,
       postalCode: "",
       shippingPrice: 0,
       shouldOpenCart: false,
-    }));
+      isCartModalOpen: false,
+    });
+  }, []);
+
+  // Setter for shouldOpenCart
+  const setShouldOpenCart = useCallback((open: boolean) => {
+    setState((prev) => ({ ...prev, shouldOpenCart: open }));
+  }, []);
+
+  // Setter for isCartModalOpen
+  const setIsCartModalOpen = useCallback((open: boolean) => {
+    setState((prev) => ({ ...prev, isCartModalOpen: open }));
   }, []);
 
   const contextValue = useMemo(
@@ -279,8 +293,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
         setState((prev) => ({ ...prev, postalCode: code })),
       setShippingPrice: (price: number) =>
         setState((prev) => ({ ...prev, shippingPrice: price })),
-      setShouldOpenCart: (shouldOpen: boolean) =>
-        setState((prev) => ({ ...prev, shouldOpenCart: shouldOpen })),
+      setShouldOpenCart,
+      setIsCartModalOpen,
       calculateShipping,
       clearCart,
     }),

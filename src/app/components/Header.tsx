@@ -31,7 +31,7 @@ const CartBadge = memo(function CartBadge({ count }: { count: number }) {
 });
 
 export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
-  const { items, shouldOpenCart, setShouldOpenCart } = useCart();
+  const { items, shouldOpenCart, setShouldOpenCart, setIsCartModalOpen } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -44,14 +44,16 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
   // Memoized handlers
   const handleCartOpen = useCallback(() => {
     setIsCartOpen(true);
+    setIsCartModalOpen(true); // Notificar al contexto
     setShouldOpenCart(false);
     onCartOpen?.();
-  }, [onCartOpen, setShouldOpenCart]);
+  }, [onCartOpen, setShouldOpenCart, setIsCartModalOpen]);
 
   const handleCartClose = useCallback(() => {
     setIsCartOpen(false);
+    setIsCartModalOpen(false); // Notificar al contexto
     setShouldOpenCart(false);
-  }, [setShouldOpenCart]);
+  }, [setShouldOpenCart, setIsCartModalOpen]);
 
   const handleSearchOpen = useCallback(() => {
     setIsSearchOpen(true);

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useChat } from "../context/ChatContext";
+import { useCart } from "../context/CartContext";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import TypingIndicator from "./TypingIndicator";
@@ -9,6 +10,7 @@ import { X, Trash2, MessageCircle, Sparkles } from "lucide-react";
 
 export default function ChatWidget() {
   const { messages, isOpen, isLoading, sendMessage, toggleChat, clearHistory } = useChat();
+  const { shouldOpenCart } = useCart(); // Detectar si el carrito está abierto
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll al último mensaje
@@ -20,8 +22,8 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Botón flotante */}
-      {!isOpen && (
+      {/* Botón flotante - oculto cuando el carrito está abierto */}
+      {!isOpen && !shouldOpenCart && (
         <button
           onClick={toggleChat}
           className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-black hover:bg-gray-900 text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group hover:scale-110 active:scale-95"
