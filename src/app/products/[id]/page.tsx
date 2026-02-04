@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useCart } from "@/app/context/CartContext";
 import { useEffect, useState } from "react";
 import { toast } from "@/components/ui/use-toast";
+import { formatPrice } from "@/utils/formatPrice";
 
 interface Product {
   id: number;
