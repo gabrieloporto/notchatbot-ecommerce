@@ -25,7 +25,7 @@ test.describe('Smoke Test', () => {
     await page.waitForTimeout(2000);
     
     // Check if there are any product cards
-    const productCards = page.locator('article, [class*="product"], [class*="card"]');
+    const productCards = page.locator('[data-testid="product-card"]');
     const count = await productCards.count();
     
     console.log(`Found ${count} product-like elements`);
@@ -33,7 +33,7 @@ test.describe('Smoke Test', () => {
     // Take screenshot showing products
     await page.screenshot({ path: 'test-results/products-visible.png', fullPage: true });
     
-    // Very loose assertion - just verify page isn't empty
-    expect(count).toBeLessThanOrEqual(0);
+    // Verify we found at least one product
+    expect(count).toBeGreaterThan(0);
   });
 });

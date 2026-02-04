@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Search Functionality - Desktop', () => {
+  // Skip on mobile projects
+  test.skip(({ isMobile }) => isMobile, 'Desktop search tests are not relevant for mobile');
   test('search on desktop', async ({ page }) => {
     await page.goto('/');
     await page.waitForLoadState('networkidle');
@@ -20,8 +22,8 @@ test.describe('Search Functionality - Desktop', () => {
     const resultsContainer = page.locator('[class*="search"], [class*="result"]').first();
     
     if (await resultsContainer.isVisible()) {
-      // Check if results contain the search term
-      await expect(page.locator('text=/medias/i')).toBeVisible();
+      // Check if results contain the search term - use .first() to avoid strict mode
+      await expect(page.locator('text=/medias/i').first()).toBeVisible();
     }
   });
 
@@ -61,6 +63,9 @@ test.describe('Search Functionality - Desktop', () => {
 });
 
 test.describe('Search Functionality - Mobile', () => {
+  // Skip on desktop projects (unless testing responsiveness specifically, but here we segregate)
+  test.skip(({ isMobile }) => !isMobile, 'Mobile search tests are not relevant for desktop');
+  
   test.use({ viewport: { width: 375, height: 667 } });
 
   test('search on mobile', async ({ page }) => {
