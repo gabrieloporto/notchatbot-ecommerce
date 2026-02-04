@@ -104,7 +104,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link href={`/products/${product.id}`}>
-      <div className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 overflow-hidden cursor-pointer h-full flex flex-col">
+      <div 
+        data-testid="product-card"
+        className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow border border-gray-200 overflow-hidden cursor-pointer h-full flex flex-col"
+      >
         {/* Imagen */}
         <div className="relative h-64 bg-gray-100 overflow-hidden flex-shrink-0">
           {product.image ? (
