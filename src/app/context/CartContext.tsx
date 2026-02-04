@@ -268,7 +268,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       addToCart,
       removeFromCart,
       updateQuantity,
-      getTotal: () => subtotal + state.shippingPrice,
+      getTotal: () => subtotal,
       getProductQuantity: (productId: number) => {
         const item = state.items.find((item) => item.product.id === productId);
         return item ? item.quantity : 0;
