@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ShoppingCart, Minus, Plus, Trash2 } from "lucide-react";
 import { useCart } from "../context/CartContext";
 import { toast } from "@/components/ui/use-toast";
+import { formatPrice } from "@/utils/formatPrice";
 
 // Types
 interface Product {
@@ -144,7 +145,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           {/* Precio y Stock */}
           <div className="flex items-baseline justify-between mb-3">
             <p className="text-2xl font-bold text-gray-900">
-              ${product.price.toLocaleString()}
+              {formatPrice(product.price)}
             </p>
             <p className="text-sm text-gray-500">
               {product.stock > 0 ? (
