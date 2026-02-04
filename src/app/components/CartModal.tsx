@@ -123,9 +123,10 @@ export const CartModal = memo(function CartModal({
   // Memoized calculations
   const subtotal = getTotal();
   const isFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
-  const total =
-    Number(subtotal) +
-    (isFreeShipping || shippingMethod === "pickup" ? 0 : Number(shippingPrice));
+  // Calculate final shipping cost
+  const finalShippingCost = 
+    isFreeShipping || shippingMethod === "pickup" ? 0 : Number(shippingPrice);
+  const total = Number(subtotal) + finalShippingCost;
 
   // Memoized handlers
   const handleCalculateShipping = useCallback(async () => {
@@ -152,7 +153,8 @@ export const CartModal = memo(function CartModal({
     setShowPostalCodeInput(true);
     setShippingMethod(null);
     setShippingPrice(0);
-  }, [setShippingMethod, setShippingPrice]);
+    setPostalCode("");
+  }, [setShippingMethod, setShippingPrice, setPostalCode]);
 
   // Efecto para inicializar el método de envío
   useEffect(() => {
@@ -278,9 +280,9 @@ export const CartModal = memo(function CartModal({
                 </div>
               )}
 
-              {(shippingPrice > 0 || shippingMethod) && (
+              {shippingMethod && (
                 <RadioGroup
-                  value={shippingMethod ?? ""}
+                  value={shippingMethod}
                   onValueChange={(value) =>
                     setShippingMethod(value as ShippingMethod)
                   }
@@ -323,10 +325,10 @@ export const CartModal = memo(function CartModal({
                   <span className="font-medium">Subtotal</span>
                   <span>{formatPrice(subtotal)}</span>
                 </div>
-                {!isFreeShipping && shippingMethod === "delivery" && (
+                {!isFreeShipping && shippingMethod === "delivery" && shippingPrice > 0 && (
                   <div className="flex justify-between">
                     <span className="font-medium">Envío</span>
-                    <span>{formatPrice(shippingPrice)}</span>
+                    <span>{formatPrice(finalShippingCost)}</span>
                   </div>
                 )}
                 <div className="mt-2 flex justify-between border-t pt-2">
