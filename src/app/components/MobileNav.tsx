@@ -41,7 +41,7 @@ export function MobileNav() {
           <div className="px-2">
             <Link href="/" onClick={() => setOpen(false)}>
               <span className="text-xl font-bold tracking-tight">
-                NotChatbot <span className="text-primary">Store</span>
+                NexoShop
               </span>
             </Link>
           </div>
