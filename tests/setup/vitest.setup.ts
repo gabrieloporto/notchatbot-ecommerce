@@ -2,6 +2,7 @@ import '@testing-library/jest-dom';
 import { cleanup } from '@testing-library/react';
 import { afterEach, vi } from 'vitest';
 import React from 'react';
+import '../mocks/setup';
 
 // Mock ResizeObserver for Radix UI components
 global.ResizeObserver = class ResizeObserver {
