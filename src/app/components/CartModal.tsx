@@ -340,7 +340,7 @@ export const CartModal = memo(function CartModal({
               {/* Checkout Button */}
               <div className="mt-6 space-y-4">
                 <Button className="w-full" asChild>
-                  <Link href="/checkout">Proceder al pago</Link>
+                  <Link href="/checkout" onClick={onClose}>Proceder al pago</Link>
                 </Button>
               </div>
             </div>
