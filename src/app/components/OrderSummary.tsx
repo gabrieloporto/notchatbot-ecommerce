@@ -113,7 +113,7 @@ export const OrderSummary = memo(function OrderSummary() {
       <div className="space-y-2">
         <TotalRow label="Subtotal" value={subtotal} />
         {shippingMethod === "delivery" && !isFreeShipping && (
-          <TotalRow label="Envío" value={shippingPrice} />
+          <TotalRow label="Envío" value={Number(shippingPrice)} />
         )}
         {(isFreeShipping || shippingMethod === "pickup") && (
           <TotalRow label="Envío" value="Gratis" />

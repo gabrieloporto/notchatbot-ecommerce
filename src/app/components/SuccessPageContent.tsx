@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { formatPrice } from "@/utils/formatPrice";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -90,7 +91,7 @@ export default function SuccessPageContent({ order: propOrder }: SuccessPageCont
             )}
             <p className="text-sm">
               <span className="font-medium">Total:</span>{" "}
-              ${order.total.toLocaleString('es-AR')}
+              {formatPrice(order.total)}
             </p>
             {order.shippingMethod && (
               <p className="text-sm">
@@ -112,7 +113,7 @@ export default function SuccessPageContent({ order: propOrder }: SuccessPageCont
                     <p className="text-sm text-gray-500">x{getItemQuantity(item)}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-medium">${getItemPrice(item).toLocaleString('es-AR')}</p>
+                    <p className="font-medium">{formatPrice(getItemPrice(item))}</p>
                   </div>
                 </div>
               ))}
