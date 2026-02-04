@@ -164,7 +164,7 @@ describe('ProductSearchResults Component', () => {
     it('shows result count (singular)', () => {
       render(
         <ProductSearchResults
-          results={[mockProducts[0]]}
+          results={[mockProducts[0]!]}
           isLoading={false}
           error={null}
           query="laptop"
@@ -190,7 +190,7 @@ describe('ProductSearchResults Component', () => {
     it('displays product images when available', () => {
       render(
         <ProductSearchResults
-          results={[mockProducts[0]]}
+          results={[mockProducts[0]!]}
           isLoading={false}
           error={null}
           query="laptop"
@@ -205,7 +205,7 @@ describe('ProductSearchResults Component', () => {
     it('shows placeholder when image is null', () => {
       render(
         <ProductSearchResults
-          results={[mockProducts[1]]}
+          results={[mockProducts[1]!]}
           isLoading={false}
           error={null}
           query="mouse"
@@ -276,7 +276,7 @@ describe('ProductSearchResults Component', () => {
         />
       );
       
-      const firstLink = screen.getAllByRole('link')[0];
+      const firstLink = screen.getAllByRole('link')[0]!;
       firstLink.click();
       
       expect(mockOnClick).toHaveBeenCalled();
