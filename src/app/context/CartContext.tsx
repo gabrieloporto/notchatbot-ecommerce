@@ -124,7 +124,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     };
 
     loadState();
-  }, [toast]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run once on mount
 
   // Save state to localStorage
   useEffect(() => {
