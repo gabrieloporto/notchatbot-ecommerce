@@ -189,7 +189,7 @@ describe('useCart Hook', () => {
       expect(result.current.getTotal()).toBe(20000); // 10000 + 5000 + 5000
     });
 
-    it('includes shipping price in total', () => {
+    it('does not include shipping price in getTotal (only subtotal)', () => {
       const { result } = renderHook(() => useCart(), { wrapper });
 
       act(() => {
@@ -197,7 +197,9 @@ describe('useCart Hook', () => {
         result.current.setShippingPrice(3000);
       });
 
-      expect(result.current.getTotal()).toBe(13000); // 10000 + 3000
+      // getTotal() returns only subtotal, shipping is handled separately in components
+      expect(result.current.getTotal()).toBe(10000);
+      expect(result.current.shippingPrice).toBe(3000);
     });
   });
 
