@@ -11,14 +11,14 @@ interface Product {
 }
 
 async function getProducts(category?: string): Promise<Product[]> {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
-  const url = new URL(`${baseUrl}/api/products`);
+  // Use relative path for API routes - works in both dev and production
+  let url = "/api/products";
   
   if (category) {
-    url.searchParams.set("category", category);
+    url += `?category=${encodeURIComponent(category)}`;
   }
 
-  const res = await fetch(url.toString(), {
+  const res = await fetch(url, {
     cache: "no-store",
   });
 

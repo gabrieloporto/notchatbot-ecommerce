@@ -50,10 +50,9 @@ export function useProductSearch(): UseProductSearchReturn {
     abortControllerRef.current = new AbortController();
 
     try {
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
+      // Use relative path for API routes - works in both dev and production
       const response = await fetch(
-        `${baseUrl}/api/products/search?q=${encodeURIComponent(searchQuery)}`,
+        `/api/products/search?q=${encodeURIComponent(searchQuery)}`,
         {
           signal: abortControllerRef.current.signal,
         },
