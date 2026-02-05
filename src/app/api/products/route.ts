@@ -1,31 +1,17 @@
-// Importa la instancia de la base de datos configurada con Drizzle ORM
-import { db } from "@/server/db";
-
-// Importa el esquema de la tabla de productos
-import { products } from "@/server/db/schema";
+// Import shared database query function
+import { getProductsFromDb } from "@/server/db/queries/products";
 
 // Importa NextResponse para manejar las respuestas HTTP en Next.js
 import { NextResponse } from "next/server";
-
-// Importa eq para las comparaciones en Drizzle
-import { eq } from "drizzle-orm";
 
 // Define el handler para el método GET en la ruta /api/products
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const category = searchParams.get("category");
+    const category = searchParams.get("category") || undefined;
 
-    let query = db.select().from(products);
-
-    // Filter by category if provided
-    if (category) {
-      // @ts-expect-error - Drizzle types might get complex with dynamic queries but this is valid
-      query = db.select().from(products).where(eq(products.category, category));
-    }
-
-    // Consulta todos los productos de la base de datos
-    const allProducts = await query;
+    // Use shared database query function
+    const allProducts = await getProductsFromDb(category);
 
     // Devuelve los productos en formato JSON con status 200
     return NextResponse.json(allProducts);

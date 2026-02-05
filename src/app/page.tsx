@@ -1,45 +1,14 @@
 import ProductCard from "./components/ProductCard";
-
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  stock: number;
-  category: string;
-}
-
-async function getProducts(category?: string): Promise<Product[]> {
-  // Server-side fetch requires absolute URL
-  // In production (Vercel), use VERCEL_URL. In dev, use localhost
-  const protocol = process.env.VERCEL_ENV === 'production' ? 'https' : 'http';
-  const host = process.env.VERCEL_URL || 'localhost:3000';
-  const baseUrl = `${protocol}://${host}`;
-  
-  let url = `${baseUrl}/api/products`;
-  
-  if (category) {
-    url += `?category=${encodeURIComponent(category)}`;
-  }
-
-  const res = await fetch(url, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch products");
-  }
-
-  const data = (await res.json()) as Product[];
-  return data;
-}
+import { getProductsFromDb, type Product } from "@/server/db/queries/products";
 
 export default async function HomePage(props: {
   searchParams: Promise<{ category?: string }>;
 }) {
   const searchParams = await props.searchParams;
-  const products = await getProducts(searchParams.category);
+  
+  // Call database directly instead of fetching API route
+  // This avoids 401 errors when Vercel deployment protection is enabled
+  const products = await getProductsFromDb(searchParams.category);
 
   return (
     <div className="min-h-screen bg-white">

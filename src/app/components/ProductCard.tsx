@@ -22,7 +22,7 @@ interface ProductCardProps {
     id: number;
     name: string;
     description: string | null;
-    price: number;
+    price: string | number; // Database stores as string but formatPrice handles both
     stock: number;
     category: string;
     image: string | null;
