@@ -12,7 +12,7 @@ interface Product {
   id: number;
   name: string;
   description: string;
-  price: number;
+  price: string | number; // Database stores as string
   image: string;
   stock: number;
 }
