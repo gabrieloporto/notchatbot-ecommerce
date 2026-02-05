@@ -1,9 +1,15 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import HomePage from '@/app/page';
 import { CartProvider } from '@/app/context/CartContext';
 import { ChatProvider } from '@/app/context/ChatContext';
+
+// Mock server-side database queries to prevent environment variable access in tests
+vi.mock('@/server/db/queries/products', () => ({
+  getProductsFromDb: vi.fn(() => Promise.resolve([])),
+  Product: {},
+}));
 
 // Helper to render with providers
 function renderWithProviders(ui: React.ReactElement) {
