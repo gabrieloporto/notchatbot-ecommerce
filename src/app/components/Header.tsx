@@ -9,7 +9,7 @@ import { ProductSearch } from "./ProductSearch";
 import { SearchModal } from "./SearchModal";
 import { CategoryNav } from "./CategoryNav";
 import { MobileNav } from "./MobileNav";
-import { useState, useEffect, useCallback, memo, useMemo } from "react";
+import { useState, useEffect, useCallback, memo, useMemo, Suspense } from "react";
 
 // Types
 interface HeaderProps {
@@ -88,7 +88,9 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
           </Link>
 
           {/* Desktop Navigation - Hidden on Mobile */}
-          <CategoryNav className="hidden md:flex mx-6" />
+          <Suspense fallback={<div className="hidden md:flex mx-6 h-5" />}>
+            <CategoryNav className="hidden md:flex mx-6" />
+          </Suspense>
 
           <div className="flex items-center space-x-4">
             {/* Desktop Search - Hidden on Mobile/Tablet */}
@@ -119,7 +121,9 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
               <ShoppingCart className="h-5 w-5" />
               <CartBadge count={totalItems} />
             </Button>
-            <MobileNav />
+            <Suspense fallback={null}>
+              <MobileNav />
+            </Suspense>
           </div>
         </div>
       </header>
