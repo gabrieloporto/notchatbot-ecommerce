@@ -11,8 +11,13 @@ interface Product {
 }
 
 async function getProducts(category?: string): Promise<Product[]> {
-  // Use relative path for API routes - works in both dev and production
-  let url = "/api/products";
+  // Server-side fetch requires absolute URL
+  // In production (Vercel), use VERCEL_URL. In dev, use localhost
+  const protocol = process.env.VERCEL_ENV === 'production' ? 'https' : 'http';
+  const host = process.env.VERCEL_URL || 'localhost:3000';
+  const baseUrl = `${protocol}://${host}`;
+  
+  let url = `${baseUrl}/api/products`;
   
   if (category) {
     url += `?category=${encodeURIComponent(category)}`;
