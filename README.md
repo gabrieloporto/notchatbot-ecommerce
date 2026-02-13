@@ -27,6 +27,7 @@
 ## ✨ Características
 
 ### 🛒 E-commerce Core
+
 - **Catálogo de Productos**: Visualización de productos con imágenes, precios y stock en tiempo real
 - **Carrito de Compras**: Gestión completa con persistencia en localStorage
 - **Checkout Inteligente**: Formulario validado con React Hook Form + Zod
@@ -37,7 +38,8 @@
 - **Órdenes**: Sistema completo de creación y visualización de pedidos
 
 ### 🤖 Chatbot con IA
-- **Asistente Conversacional**: Powered by Google Gemini AI (gemini-2.0-flash-exp)
+
+- **Asistente Conversacional**: Powered by Google Gemini AI (gemini-2.5-flash)
 - **RAG (Retrieval Augmented Generation)**: Búsqueda semántica con Pinecone Vector Database
 - **Recomendaciones Inteligentes**: Sugerencias de productos basadas en consultas naturales
 - **Contexto Conversacional**: Mantiene el historial de mensajes para respuestas coherentes
@@ -45,6 +47,7 @@
 - **UI Interactiva**: Widget flotante con tarjetas de productos clickeables
 
 ### 🎨 UX/UI
+
 - **Diseño Responsivo**: Mobile-first con optimizaciones para tablet y desktop
 - **Componentes Accesibles**: Usando Radix UI para máxima accesibilidad
 - **Animaciones Suaves**: Transiciones fluidas con Tailwind CSS
@@ -54,6 +57,7 @@
 - **Optimización de Imágenes**: Next.js Image con lazy loading
 
 ### 📦 Features Técnicas
+
 - **TypeScript Strict**: Type safety en todo el proyecto
 - **Server Components**: Aprovecha RSC de Next.js 16
 - **API Routes**: 8 endpoints RESTful bien estructurados
@@ -68,6 +72,7 @@
 ## 🛠️ Stack Tecnológico
 
 ### Frontend
+
 - **Framework**: [Next.js 16](https://nextjs.org/) - React framework con App Router
 - **UI Library**: [React 19](https://react.dev/) - Biblioteca de componentes
 - **Lenguaje**: [TypeScript 5.8](https://www.typescriptlang.org/) - Type safety
@@ -78,6 +83,7 @@
 - **Utilidades**: clsx, tailwind-merge, class-variance-authority
 
 ### Backend
+
 - **Runtime**: [Node.js](https://nodejs.org/) - JavaScript runtime
 - **Database**: [PostgreSQL](https://www.postgresql.org/) - Base de datos relacional
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/) - Type-safe ORM
@@ -86,12 +92,14 @@
 - **Env Management**: [@t3-oss/env-nextjs](https://env.t3.gg/) - Type-safe env vars
 
 ### IA & Machine Learning
-- **LLM**: [Google Gemini AI](https://ai.google.dev/) - gemini-2.0-flash-exp
+
+- **LLM**: [Google Gemini AI](https://ai.google.dev/) - gemini-2.5-flash
 - **Vector Database**: [Pinecone](https://www.pinecone.io/) - Serverless vector DB
-- **Embeddings**: Google Generative AI - text-embedding-004
+- **Embeddings**: Google Generative AI - gemini-embedding-001
 - **RAG**: Custom implementation con Pinecone + Gemini
 
 ### DevOps & Testing
+
 - **Package Manager**: [pnpm](https://pnpm.io/) - Fast, disk space efficient
 - **Testing Framework**: [Vitest](https://vitest.dev/) - Unit testing
 - **E2E Testing**: [Playwright](https://playwright.dev/) - Browser automation
@@ -229,18 +237,18 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
 ### Variables de Entorno
 
-| Variable | Descripción | Ejemplo | Obligatoria |
-|----------|-------------|---------|-------------|
-| `DATABASE_URL` | URL de conexión a PostgreSQL | `postgresql://user:pass@host/db` | ✅ |
-| `GOOGLE_GEMINI_API_KEY` | API key de Google AI Studio | `AIzaSy...` | ✅ |
-| `PINECONE_API_KEY` | API key de Pinecone | `pcsk_...` | ✅ |
-| `PINECONE_INDEX_NAME` | Nombre del índice en Pinecone | `products` | ✅ |
+| Variable                | Descripción                   | Ejemplo                          | Obligatoria |
+| ----------------------- | ----------------------------- | -------------------------------- | ----------- |
+| `DATABASE_URL`          | URL de conexión a PostgreSQL  | `postgresql://user:pass@host/db` | ✅          |
+| `GOOGLE_GEMINI_API_KEY` | API key de Google AI Studio   | `AIzaSy...`                      | ✅          |
+| `PINECONE_API_KEY`      | API key de Pinecone           | `pcsk_...`                       | ✅          |
+| `PINECONE_INDEX_NAME`   | Nombre del índice en Pinecone | `products`                       | ✅          |
 
 ### Configuración de Pinecone
 
 El proyecto espera un índice de Pinecone con las siguientes características:
 
-- **Dimensiones**: 768 (para text-embedding-004)
+- **Dimensiones**: 3072 (para gemini-embedding-001)
 - **Métrica**: cosine
 - **Regiones**: us-east-1 (o tu región preferida)
 
@@ -248,7 +256,7 @@ Crear índice:
 
 ```bash
 # Desde la consola de Pinecone o usando su CLI
-pinecone create-index products --dimension 768 --metric cosine
+pinecone create-index products --dimension 3072 --metric cosine
 ```
 
 ---
@@ -392,9 +400,11 @@ nexoshop-ecommerce/
 ### Products
 
 #### `GET /api/products`
+
 Obtiene todos los productos con stock disponible.
 
 **Response:**
+
 ```json
 [
   {
@@ -410,9 +420,11 @@ Obtiene todos los productos con stock disponible.
 ```
 
 #### `GET /api/products/[id]`
+
 Obtiene un producto por ID.
 
 **Response:**
+
 ```json
 {
   "id": 1,
@@ -426,12 +438,15 @@ Obtiene un producto por ID.
 ```
 
 #### `GET /api/products/search?q=zapatillas`
+
 Búsqueda de productos por nombre.
 
 **Query params:**
+
 - `q` (string, required): Término de búsqueda
 
 **Response:**
+
 ```json
 [
   {
@@ -446,9 +461,11 @@ Búsqueda de productos por nombre.
 ### Orders
 
 #### `POST /api/orders`
+
 Crea una nueva orden.
 
 **Request body:**
+
 ```json
 {
   "customerEmail": "user@example.com",
@@ -472,6 +489,7 @@ Crea una nueva orden.
 ```
 
 **Response:**
+
 ```json
 {
   "id": 42,
@@ -482,9 +500,11 @@ Crea una nueva orden.
 ```
 
 #### `GET /api/orders/[id]`
+
 Obtiene una orden por ID.
 
 **Response:**
+
 ```json
 {
   "id": 42,
@@ -500,12 +520,15 @@ Obtiene una orden por ID.
 ### Shipping
 
 #### `GET /api/shipping-costs/[cp]`
+
 Obtiene el costo de envío para un código postal.
 
 **Params:**
+
 - `cp` (string): Código postal
 
 **Response:**
+
 ```json
 {
   "price": 1500,
@@ -516,9 +539,11 @@ Obtiene el costo de envío para un código postal.
 ### Chat
 
 #### `POST /api/chat`
+
 Endpoint del chatbot con Gemini AI.
 
 **Request body:**
+
 ```json
 {
   "message": "Busco zapatillas deportivas",
@@ -531,9 +556,11 @@ Endpoint del chatbot con Gemini AI.
 ### Semantic Search
 
 #### `POST /api/search/semantic`
+
 Búsqueda semántica con Pinecone.
 
 **Request body:**
+
 ```json
 {
   "query": "zapatillas cómodas para correr"
@@ -541,6 +568,7 @@ Búsqueda semántica con Pinecone.
 ```
 
 **Response:**
+
 ```json
 {
   "results": [
@@ -563,40 +591,43 @@ Búsqueda semántica con Pinecone.
 ### Schema
 
 #### `products`
-| Campo | Tipo | Constraints |
-|-------|------|-------------|
-| id | serial | PRIMARY KEY |
-| name | text | NOT NULL |
-| description | text | nullable |
-| price | numeric(10,2) | NOT NULL |
-| image | text | nullable |
-| category | text | NOT NULL |
-| stock | integer | NOT NULL, DEFAULT 10 |
+
+| Campo       | Tipo          | Constraints          |
+| ----------- | ------------- | -------------------- |
+| id          | serial        | PRIMARY KEY          |
+| name        | text          | NOT NULL             |
+| description | text          | nullable             |
+| price       | numeric(10,2) | NOT NULL             |
+| image       | text          | nullable             |
+| category    | text          | NOT NULL             |
+| stock       | integer       | NOT NULL, DEFAULT 10 |
 
 #### `shipping_costs`
-| Campo | Tipo | Constraints |
-|-------|------|-------------|
-| postal_code | text | PRIMARY KEY |
-| price | numeric(10,2) | NOT NULL |
+
+| Campo       | Tipo          | Constraints |
+| ----------- | ------------- | ----------- |
+| postal_code | text          | PRIMARY KEY |
+| price       | numeric(10,2) | NOT NULL    |
 
 #### `orders`
-| Campo | Tipo | Constraints |
-|-------|------|-------------|
-| id | serial | PRIMARY KEY |
-| customer_email | text | NOT NULL |
-| customer_name | text | NOT NULL |
-| customer_phone | text | NOT NULL |
-| shipping_address | text | NOT NULL |
-| shipping_city | text | NOT NULL |
-| shipping_province | text | NOT NULL |
-| shipping_postal_code | text | nullable |
-| shipping_method | text | NOT NULL |
-| shipping_price | numeric(10,2) | NOT NULL |
-| subtotal | numeric(10,2) | NOT NULL |
-| total | numeric(10,2) | NOT NULL |
-| status | text | NOT NULL, DEFAULT 'pending' |
-| created_at | timestamp | NOT NULL, DEFAULT NOW() |
-| items | jsonb | NOT NULL |
+
+| Campo                | Tipo          | Constraints                 |
+| -------------------- | ------------- | --------------------------- |
+| id                   | serial        | PRIMARY KEY                 |
+| customer_email       | text          | NOT NULL                    |
+| customer_name        | text          | NOT NULL                    |
+| customer_phone       | text          | NOT NULL                    |
+| shipping_address     | text          | NOT NULL                    |
+| shipping_city        | text          | NOT NULL                    |
+| shipping_province    | text          | NOT NULL                    |
+| shipping_postal_code | text          | nullable                    |
+| shipping_method      | text          | NOT NULL                    |
+| shipping_price       | numeric(10,2) | NOT NULL                    |
+| subtotal             | numeric(10,2) | NOT NULL                    |
+| total                | numeric(10,2) | NOT NULL                    |
+| status               | text          | NOT NULL, DEFAULT 'pending' |
+| created_at           | timestamp     | NOT NULL, DEFAULT NOW()     |
+| items                | jsonb         | NOT NULL                    |
 
 ### Migraciones
 
@@ -638,6 +669,7 @@ pnpm test:ui
 ```
 
 **Coverage actual:**
+
 - **Test Files**: 23 archivos
 - **Tests**: 252 pasados
 - **Statements**: 76.43% (506/662)
@@ -657,6 +689,7 @@ pnpm test tests/integration
 ```
 
 **Test suites de integración:**
+
 - `shopping-flow.test.tsx`: Flujo completo de compra con APIs mockeadas
   - Fetch de productos desde `/api/products`
   - Obtención de producto individual
@@ -665,6 +698,7 @@ pnpm test tests/integration
   - Búsqueda semántica
 
 **Características:**
+
 - ✅ MSW (Mock Service Worker) para mockear APIs
 - ✅ Verificación de respuestas de API
 - ✅ Validación de estructura de datos
@@ -684,6 +718,7 @@ pnpm test:e2e -- --project=chromium
 ```
 
 **Test suites:**
+
 - `smoke.spec.ts`: Tests básicos de carga
 - `purchase-flow.spec.ts`: Flujo completo de compra
 - `search.spec.ts`: Funcionalidad de búsqueda
@@ -719,6 +754,7 @@ git push origin main
 ```
 
 2. **Conecta con Vercel**
+
    - Ve a [vercel.com](https://vercel.com)
    - Importa el repositorio
    - Configura las variables de entorno
@@ -738,6 +774,7 @@ PINECONE_INDEX_NAME=products
 ### Railway / Render
 
 Similar a Vercel:
+
 1. Conecta el repositorio
 2. Configura variables de entorno
 3. Deploy
@@ -766,6 +803,7 @@ Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para
 ## 👨‍💻 Autor
 
 **Gabriel Porto**
+
 - GitHub: [@gabrieloporto](https://github.com/gabrieloporto)
 - Email: gabrieloporto@ejemplo.com
 

@@ -1,6 +1,6 @@
 /**
  * Servicio para generar embeddings de texto usando Google Generative AI
- * Utiliza el modelo text-embedding-004 (768 dimensiones)
+ * Utiliza el modelo gemini-embedding-001
  */
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -29,9 +29,11 @@ class EmbeddingService {
   private static getClient(): GoogleGenerativeAI {
     if (!this.genAI) {
       const apiKey = env.GOOGLE_API_KEY;
-      
+
       if (!apiKey) {
-        throw new Error("GOOGLE_API_KEY no está configurada en las variables de entorno");
+        throw new Error(
+          "GOOGLE_API_KEY no está configurada en las variables de entorno",
+        );
       }
 
       this.genAI = new GoogleGenerativeAI(apiKey);
@@ -50,9 +52,9 @@ class EmbeddingService {
     const genAI = this.getClient();
 
     try {
-      const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
+      const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
       const result = await model.embedContent(text);
-      
+
       return result.embedding.values;
     } catch (error) {
       console.error("Error al generar embedding con Google AI:", error);
@@ -107,21 +109,21 @@ class EmbeddingService {
    */
   static async generateEmbeddings(texts: string[]): Promise<number[][]> {
     const genAI = this.getClient();
-    const model = genAI.getGenerativeModel({ model: "text-embedding-004" });
+    const model = genAI.getGenerativeModel({ model: "gemini-embedding-001" });
     const embeddings: number[][] = [];
-    
+
     // Google AI permite batch, pero procesamos de a uno por seguridad
     // para evitar problemas con rate limiting
     for (let i = 0; i < texts.length; i++) {
       try {
         const result = await model.embedContent(texts[i]!);
         embeddings.push(result.embedding.values);
-        
+
         // Pequeño delay para no saturar la API
         if (i < texts.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
         }
-        
+
         // Mostrar progreso cada 5 productos
         if ((i + 1) % 5 === 0 || i === texts.length - 1) {
           console.log(`   Procesados ${i + 1}/${texts.length} embeddings`);
