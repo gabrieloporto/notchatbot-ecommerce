@@ -8,6 +8,7 @@ import { Toaster } from "@/components/ui/toaster";
 import ChatWidget from "./components/ChatWidget";
 import { Header } from "./components/Header";
 import { ShippingBanner } from "./components/ShippingBanner";
+import { AuthProvider } from "./components/AuthProvider";
 
 export const metadata: Metadata = {
   title: "NexoShop",
@@ -26,15 +27,17 @@ export default function RootLayout({
   return (
     <html lang="es" className={`${geist.variable}`}>
       <body>
-        <CartProvider>
-          <ChatProvider>
-            <ShippingBanner />
-            <Header />
-            {children}
-            <ChatWidget />
-            <Toaster />
-          </ChatProvider>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <ChatProvider>
+              <ShippingBanner />
+              <Header />
+              {children}
+              <ChatWidget />
+              <Toaster />
+            </ChatProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );

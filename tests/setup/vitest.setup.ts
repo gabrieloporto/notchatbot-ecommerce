@@ -1,8 +1,8 @@
-import '@testing-library/jest-dom';
-import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
-import React from 'react';
-import '../mocks/setup';
+import "@testing-library/jest-dom";
+import { cleanup } from "@testing-library/react";
+import { afterEach, vi } from "vitest";
+import React from "react";
+import "../mocks/setup";
 
 // Mock ResizeObserver for Radix UI components
 global.ResizeObserver = class ResizeObserver {
@@ -17,7 +17,7 @@ afterEach(() => {
 });
 
 // Mock Next.js router
-vi.mock('next/navigation', () => ({
+vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
@@ -26,16 +26,24 @@ vi.mock('next/navigation', () => ({
     refresh: vi.fn(),
     prefetch: vi.fn(),
   }),
-  usePathname: () => '/',
+  usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
   notFound: () => {
-    throw new Error('Not Found');
+    throw new Error("Not Found");
   },
 }));
 
 // Mock Next.js Image component
-vi.mock('next/image', () => ({
+vi.mock("next/image", () => ({
   default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
-    return React.createElement('img', props);
+    return React.createElement("img", props);
   },
+}));
+
+// Mock next-auth/react for components that use useSession
+vi.mock("next-auth/react", () => ({
+  useSession: () => ({ data: null, status: "unauthenticated" }),
+  signIn: vi.fn(),
+  signOut: vi.fn(),
+  SessionProvider: ({ children }: { children: React.ReactNode }) => children,
 }));

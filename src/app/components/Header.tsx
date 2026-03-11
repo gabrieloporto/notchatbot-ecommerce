@@ -9,7 +9,15 @@ import { ProductSearch } from "./ProductSearch";
 import { SearchModal } from "./SearchModal";
 import { CategoryNav } from "./CategoryNav";
 import { MobileNav } from "./MobileNav";
-import { useState, useEffect, useCallback, memo, useMemo, Suspense } from "react";
+import { UserMenu } from "./UserMenu";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  memo,
+  useMemo,
+  Suspense,
+} from "react";
 
 // Types
 interface HeaderProps {
@@ -31,7 +39,8 @@ const CartBadge = memo(function CartBadge({ count }: { count: number }) {
 });
 
 export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
-  const { items, shouldOpenCart, setShouldOpenCart, setIsCartModalOpen } = useCart();
+  const { items, shouldOpenCart, setShouldOpenCart, setIsCartModalOpen } =
+    useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -79,17 +88,15 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
         <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link
             href="/"
-            className="focus:ring-primary flex items-left space-x-2 rounded-md focus:ring-2 focus:ring-offset-2 focus:outline-none text-xl font-bold tracking-tight flex-col"
+            className="focus:ring-primary items-left flex flex-col space-x-2 rounded-md text-xl font-bold tracking-tight focus:ring-2 focus:ring-offset-2 focus:outline-none"
             aria-label="Ir a la página principal"
           >
-            <span>
-              NexoShop
-            </span>
+            <span>NexoShop</span>
           </Link>
 
           {/* Desktop Navigation - Hidden on Mobile */}
-          <Suspense fallback={<div className="hidden md:flex mx-6 h-5" />}>
-            <CategoryNav className="hidden md:flex mx-6" />
+          <Suspense fallback={<div className="mx-6 hidden h-5 md:flex" />}>
+            <CategoryNav className="mx-6 hidden md:flex" />
           </Suspense>
 
           <div className="flex items-center space-x-4">
@@ -102,7 +109,7 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden h-9 w-9 cursor-pointer transition-colors hover:bg-gray-100"
+              className="h-9 w-9 cursor-pointer transition-colors hover:bg-gray-100 lg:hidden"
               onClick={handleSearchOpen}
               aria-label="Abrir búsqueda"
             >
@@ -121,6 +128,10 @@ export const Header = memo(function Header({ onCartOpen }: HeaderProps) {
               <ShoppingCart className="h-5 w-5" />
               <CartBadge count={totalItems} />
             </Button>
+
+            {/* User Menu */}
+            <UserMenu />
+
             <Suspense fallback={null}>
               <MobileNav />
             </Suspense>
