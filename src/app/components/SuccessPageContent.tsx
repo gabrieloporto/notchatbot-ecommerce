@@ -38,6 +38,7 @@ export default function SuccessPageContent({ order: propOrder }: SuccessPageCont
   const router = useRouter();
   const searchParams = useSearchParams();
   const orderId = searchParams?.get("orderId");
+  const paymentStatus = searchParams?.get("status") ?? searchParams?.get("collection_status");
   const [fetchedOrder, setFetchedOrder] = useState<Order | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(true);
   const { clearCart } = useCart(); // Usa el hook
@@ -51,6 +52,13 @@ export default function SuccessPageContent({ order: propOrder }: SuccessPageCont
     }
   }, [orderId, propOrder]);
 
+  // Limpiar carrito cuando el pago fue aprobado
+  useEffect(() => {
+    if (paymentStatus === "approved") {
+      clearCart();
+    }
+  }, [paymentStatus, clearCart]);
+
   const order = propOrder || fetchedOrder;
 
   if (!order) {
@@ -63,6 +71,44 @@ export default function SuccessPageContent({ order: propOrder }: SuccessPageCont
     );
   }
 
+  // Determinar título y mensaje según estado del pago
+  const getStatusInfo = () => {
+    switch (paymentStatus) {
+      case "approved":
+        return {
+          title: "¡Pago aprobado!",
+          message: "Tu pago fue procesado exitosamente. Te enviaremos un email con los detalles de tu compra.",
+          color: "text-green-600",
+          badge: "✅ Aprobado",
+        };
+      case "pending":
+      case "in_process":
+        return {
+          title: "Pago pendiente",
+          message: "Tu pago está siendo procesado. Te notificaremos cuando sea aprobado.",
+          color: "text-yellow-600",
+          badge: "⏳ Pendiente",
+        };
+      case "rejected":
+      case "failure":
+        return {
+          title: "Pago rechazado",
+          message: "Tu pago fue rechazado. Por favor intenta con otro medio de pago.",
+          color: "text-red-600",
+          badge: "❌ Rechazado",
+        };
+      default:
+        return {
+          title: "¡Compra Exitosa!",
+          message: "Tu orden ha sido procesada exitosamente. Te enviaremos un email con los detalles de tu compra.",
+          color: "text-primary",
+          badge: null,
+        };
+    }
+  };
+
+  const statusInfo = getStatusInfo();
+
   // Helper to get item details from both formats
   const getItemName = (item: Order['items'][0]) => item.name || item.product?.name || '';
   const getItemPrice = (item: Order['items'][0]) => item.price || item.product?.price || 0;
@@ -72,10 +118,13 @@ export default function SuccessPageContent({ order: propOrder }: SuccessPageCont
     <div className="container mx-auto flex min-h-screen items-center justify-center px-4">
       <div className="w-full max-w-2xl">
         <div className="mb-8 text-center">
-          <h1 className="mb-4 text-3xl font-bold">¡Compra Exitosa!</h1>
-          <p className="text-gray-600">
-            Tu orden ha sido procesada exitosamente. Te enviaremos un email con los detalles de tu compra.
-          </p>
+          <h1 className={`mb-4 text-3xl font-bold ${statusInfo.color}`}>{statusInfo.title}</h1>
+          <p className="text-gray-600">{statusInfo.message}</p>
+          {statusInfo.badge && (
+            <span className="mt-3 inline-block rounded-full bg-gray-100 px-4 py-1 text-sm font-medium">
+              {statusInfo.badge}
+            </span>
+          )}
         </div>
 
         <div className="mb-8 rounded-lg border p-6">

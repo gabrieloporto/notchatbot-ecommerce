@@ -105,6 +105,9 @@ export const orders = pgTable("orders", {
   subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
   status: text("status").notNull().default("pending"),
+  paymentId: text("payment_id"),
+  preferenceId: text("preference_id"),
+  paymentStatus: text("payment_status"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   items: jsonb("items").notNull(),
 });

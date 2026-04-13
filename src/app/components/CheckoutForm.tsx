@@ -197,35 +197,22 @@ export const CheckoutForm = memo(function CheckoutForm() {
         throw new Error("Error al crear la orden");
       }
 
-      // Define the expected structure of the order object
-      interface Order {
+      // La respuesta ahora incluye init_point de MercadoPago
+      interface OrderResponse {
         id: number;
-        customerEmail: string;
-        customerName: string;
-        customerPhone: string;
-        shippingAddress: string;
-        shippingCity: string;
-        shippingProvince: string;
-        shippingPostalCode?: string;
-        shippingMethod: string;
-        shippingPrice: number;
-        subtotal: number;
-        total: number;
-        status: string;
-        createdAt: string;
-        items: Array<{
-          product: {
-            id: number;
-            name: string;
-            price: number;
-            image: string;
-          };
-          quantity: number;
-        }>;
+        init_point: string;
       }
 
-      const order = (await response.json()) as Order;
-      router.push(`/success?orderId=${order.id}`);
+      const order = (await response.json()) as OrderResponse;
+
+      // Redirigir al checkout de MercadoPago
+      // Siempre usar init_point — MP retorna la URL correcta según el tipo de Access Token
+      if (order.init_point) {
+        window.location.href = order.init_point;
+      } else {
+        // Fallback si no hay URL de MP (ej: MP_ACCESS_TOKEN no configurado)
+        router.push(`/success?orderId=${order.id}`);
+      }
     } catch (error) {
       console.error("Error al crear la orden:", error);
       form.setError("root", {
