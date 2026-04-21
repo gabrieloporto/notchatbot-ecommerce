@@ -173,13 +173,6 @@ Follow it to keep changes consistent, safe, and reviewable.
    - relevant `pnpm test ...` command(s)
 5. If a full suite is too expensive, state exactly what was run.
 
-## Cursor / Copilot Instructions
-
-- Checked `.cursor/rules/`: not present.
-- Checked `.cursorrules`: not present.
-- Checked `.github/copilot-instructions.md`: not present.
-- If any of these files are later added, treat them as high-priority repo rules and update this document.
-
 ## Git Hygiene for Agents
 
 - Do not revert unrelated local changes.
