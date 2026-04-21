@@ -16,6 +16,7 @@ export const env = createEnv({
     OPENAI_API_KEY: z.string().min(1).optional(),
     GOOGLE_API_KEY: z.string().min(1),
     MP_ACCESS_TOKEN: z.string().min(1).optional(),
+    AUTOMATION_WEBHOOK_URL: z.string().url().optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -44,6 +45,7 @@ export const env = createEnv({
     OPENAI_API_KEY: process.env.OPENAI_API_KEY,
     GOOGLE_API_KEY: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
     MP_ACCESS_TOKEN: process.env.MP_ACCESS_TOKEN,
+    AUTOMATION_WEBHOOK_URL: process.env.AUTOMATION_WEBHOOK_URL,
     NODE_ENV: process.env.NODE_ENV,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
