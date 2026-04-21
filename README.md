@@ -19,6 +19,7 @@
 - [Estructura del Proyecto](#-estructura-del-proyecto)
 - [API Endpoints](#-api-endpoints)
 - [Base de Datos](#️-base-de-datos)
+- [Automatización](#-automatización)
 - [Testing](#-testing)
 - [Despliegue](#-despliegue)
 
@@ -31,11 +32,20 @@
 - **Catálogo de Productos**: Visualización de productos con imágenes, precios y stock en tiempo real
 - **Carrito de Compras**: Gestión completa con persistencia en localStorage
 - **Checkout Inteligente**: Formulario validado con React Hook Form + Zod
+- **Pagos Integrados**: Creación de preferencias y checkout con Mercado Pago
 - **Cálculo Dinámico de Envío**: Basado en código postal con envío gratis a partir de cierto monto
 - **Búsqueda de Productos**: Búsqueda en tiempo real con debouncing
 - **Navegación por Categorías**: Filtrado rápido por categorías de productos
 - **Gestión de Stock**: Control de disponibilidad y límites de cantidad
 - **Órdenes**: Sistema completo de creación y visualización de pedidos
+
+### 🔐 Autenticación
+
+- **Login Social**: Autenticación con Google usando NextAuth
+- **Login con Credenciales**: Acceso con email y contraseña
+- **Registro de Usuarios**: Creación de cuenta con validación y hash de contraseñas
+- **Sesiones Persistentes**: Manejo de sesión con JWT y callbacks de NextAuth
+- **Roles de Usuario**: Soporte para roles persistidos en base de datos
 
 ### 🤖 Chatbot con IA
 
@@ -67,6 +77,16 @@
 - **Code Quality**: ESLint, Prettier, TypeScript compiler
 - **CI/CD Ready**: Scripts de build, test y deploy
 
+### 🤖 Automatización Operativa
+
+- **Order-to-Fulfillment Bot**: Automatiza el post-pago cuando Mercado Pago confirma una orden
+- **Validación de Stock**: Verifica disponibilidad real antes de reservar inventario
+- **Descuento Automático**: Actualiza stock al aprobarse el pago
+- **Gestión de Excepciones**: Marca órdenes como `manual_review` cuando falta stock o hay inconsistencias
+- **Auditoría del Bot**: Registra eventos operativos en `automation_events`
+- **Notificaciones Operativas**: Envía alertas a Slack vía webhook o a un endpoint demo interno
+- **Demo Controlada**: Permite disparar el flujo completo con `simulate-payment` sin depender del webhook real
+
 ---
 
 ## 🛠️ Stack Tecnológico
@@ -88,6 +108,8 @@
 - **Database**: [PostgreSQL](https://www.postgresql.org/) - Base de datos relacional
 - **ORM**: [Drizzle ORM](https://orm.drizzle.team/) - Type-safe ORM
 - **API**: Next.js App Router API Routes - Serverless functions
+- **Auth**: [NextAuth.js](https://next-auth.js.org/) v5 beta con Google + Credentials
+- **Payments**: [Mercado Pago](https://www.mercadopago.com.ar/developers/) - Checkout Pro + Webhooks
 - **Validación**: [Zod](https://zod.dev/) - Schema validation
 - **Env Management**: [@t3-oss/env-nextjs](https://env.t3.gg/) - Type-safe env vars
 
@@ -152,6 +174,25 @@ graph LR
     B --> A
 ```
 
+### Flujo de Automatización de Órdenes
+
+```mermaid
+graph TD
+    A[Cliente finaliza compra] --> B[POST /api/orders]
+    B --> C[Orden creada con status pending]
+    C --> D[Mercado Pago Checkout]
+    D --> E[Webhook /api/webhooks/mercadopago]
+    E --> F[processOrderPaymentAutomation]
+    F --> G{Stock suficiente?}
+    G -->|Sí| H[Descuenta stock]
+    H --> I[Orden ready_for_fulfillment]
+    I --> J[Registra automation_events]
+    J --> K[Notifica a Slack o endpoint demo]
+    G -->|No| L[Orden manual_review]
+    L --> M[Registra exception en automation_events]
+    M --> K
+```
+
 ---
 
 ## 🚀 Instalación
@@ -164,6 +205,9 @@ graph LR
 - **Cuentas de servicios**:
   - [Google AI Studio](https://makersuite.google.com/app/apikey) - API key de Gemini
   - [Pinecone](https://www.pinecone.io/) - API key para vector DB
+  - [Google Cloud Console](https://console.cloud.google.com/) - OAuth client para login con Google
+  - [Mercado Pago Developers](https://www.mercadopago.com.ar/developers/panel/app) - Access Token para pagos
+  - [Slack Incoming Webhooks](https://api.slack.com/messaging/webhooks) - Webhook opcional para alertas operativas
 
 ### Paso 1: Clonar el repositorio
 
@@ -192,12 +236,23 @@ cp .env.example .env
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/nexoshop-ecommerce"
 
+# Auth.js
+AUTH_SECRET=""
+AUTH_GOOGLE_ID=""
+AUTH_GOOGLE_SECRET=""
+
+# MercadoPago
+MP_ACCESS_TOKEN=""
+
 # Google Gemini AI
-GOOGLE_GEMINI_API_KEY="tu_api_key_aqui"
+GOOGLE_GENERATIVE_AI_API_KEY="tu_api_key_aqui"
 
 # Pinecone Vector Database
 PINECONE_API_KEY="tu_pinecone_api_key"
 PINECONE_INDEX_NAME="products"
+
+# Automation
+AUTOMATION_WEBHOOK_URL=""
 ```
 
 ### Paso 4: Configurar la base de datos
@@ -237,12 +292,19 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
 ### Variables de Entorno
 
-| Variable                | Descripción                   | Ejemplo                          | Obligatoria |
-| ----------------------- | ----------------------------- | -------------------------------- | ----------- |
-| `DATABASE_URL`          | URL de conexión a PostgreSQL  | `postgresql://user:pass@host/db` | ✅          |
-| `GOOGLE_GEMINI_API_KEY` | API key de Google AI Studio   | `AIzaSy...`                      | ✅          |
-| `PINECONE_API_KEY`      | API key de Pinecone           | `pcsk_...`                       | ✅          |
-| `PINECONE_INDEX_NAME`   | Nombre del índice en Pinecone | `products`                       | ✅          |
+| Variable                       | Descripción                         | Ejemplo                          | Obligatoria |
+| ------------------------------ | ----------------------------------- | -------------------------------- | ----------- |
+| `DATABASE_URL`                 | URL de conexión a PostgreSQL        | `postgresql://user:pass@host/db` | ✅          |
+| `AUTH_SECRET`                  | Secreto de NextAuth                 | `random-secret`                  | ⚠️          |
+| `AUTH_GOOGLE_ID`               | OAuth Client ID de Google           | `123.apps.googleusercontent...`  | ⚠️          |
+| `AUTH_GOOGLE_SECRET`           | OAuth Client Secret                 | `GOCSPX-...`                     | ⚠️          |
+| `MP_ACCESS_TOKEN`              | Access token de Mercado Pago        | `APP_USR-...`                    | ⚠️          |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | API key de Google AI Studio         | `AIzaSy...`                      | ✅          |
+| `PINECONE_API_KEY`             | API key de Pinecone                 | `pcsk_...`                       | ✅          |
+| `PINECONE_INDEX_NAME`          | Nombre del índice en Pinecone       | `products`                       | ✅          |
+| `AUTOMATION_WEBHOOK_URL`       | Webhook de Slack o endpoint externo | `https://hooks.slack.com/...`    | ❌          |
+
+`⚠️` Algunas variables son opcionales para correr localmente, pero necesarias para habilitar login social o pagos reales.
 
 ### Configuración de Pinecone
 
@@ -267,7 +329,6 @@ pinecone create-index products --dimension 3072 --metric cosine
 
 ```bash
 pnpm dev          # Inicia dev server con Turbopack
-pnpm dev:debug    # Dev server con inspector de Node.js
 ```
 
 ### Build & Deploy
@@ -304,6 +365,17 @@ pnpm sync:pinecone     # Sincroniza productos a Pinecone
 pnpm test:rag          # Prueba el sistema RAG
 ```
 
+### Automatización
+
+```bash
+# Demo controlada del bot (via endpoint)
+POST /api/orders/:id/simulate-payment
+
+# Endpoint demo para recibir eventos operativos
+GET /api/automation-demo-events
+POST /api/automation-demo-events
+```
+
 ### Code Quality
 
 ```bash
@@ -324,11 +396,14 @@ nexoshop-ecommerce/
 ├── src/
 │   ├── app/                          # Next.js App Router
 │   │   ├── api/                      # API Routes
+│   │   │   ├── auth/                 # NextAuth + registro de usuarios
+│   │   │   ├── automation-demo-events/ # Endpoint demo de notificaciones del bot
 │   │   │   ├── chat/                 # Chatbot endpoint
 │   │   │   ├── orders/               # Órdenes CRUD
 │   │   │   ├── products/             # Productos CRUD
 │   │   │   ├── search/               # Búsqueda semántica
-│   │   │   └── shipping-costs/       # Costos de envío
+│   │   │   ├── shipping-costs/       # Costos de envío
+│   │   │   └── webhooks/mercadopago/ # Webhook de pagos de Mercado Pago
 │   │   ├── components/               # Componentes de React
 │   │   │   ├── CartModal.tsx         # Modal del carrito
 │   │   │   ├── ChatWidget.tsx        # Widget del chatbot
@@ -349,10 +424,15 @@ nexoshop-ecommerce/
 │   ├── components/                   # UI components (shadcn)
 │   │   └── ui/                       # Componentes base
 │   ├── lib/                          # Librerías y servicios
+│   │   ├── automation-notifier.ts    # Notificaciones operativas
 │   │   ├── embedding-service.ts      # Servicio de embeddings
 │   │   ├── llm-service.ts            # Servicio de Gemini AI
+│   │   ├── mercadopago.ts            # Cliente de Mercado Pago
+│   │   ├── order-automation.ts       # Motor de automatización post-pago
+│   │   ├── order-status.ts           # Etiquetas y estados de órdenes
 │   │   ├── pinecone-client.ts        # Cliente de Pinecone
-│   │   └── utils.ts                  # Utilidades
+│   │   └── password.ts               # Hash y verificación de contraseñas
+│   ├── auth.ts                       # Configuración principal de NextAuth
 │   ├── scripts/                      # Scripts de utilidad
 │   │   ├── seed.ts                   # Seed de DB
 │   │   ├── sync-products-to-pinecone.ts
@@ -462,7 +542,7 @@ Búsqueda de productos por nombre.
 
 #### `POST /api/orders`
 
-Crea una nueva orden.
+Crea una nueva orden y, si `MP_ACCESS_TOKEN` está configurado, genera una preferencia de Mercado Pago.
 
 **Request body:**
 
@@ -494,6 +574,8 @@ Crea una nueva orden.
 {
   "id": 42,
   "status": "pending",
+  "preferenceId": "123456789-abc",
+  "init_point": "https://www.mercadopago.com.ar/checkout/...",
   "createdAt": "2026-02-04T18:00:00.000Z",
   ...
 }
@@ -512,10 +594,51 @@ Obtiene una orden por ID.
   "customerName": "Juan Pérez",
   "total": 51500,
   "status": "pending",
+  "automationEvents": [],
+  "automationSummary": {
+    "totalEvents": 0,
+    "lastEvent": null,
+    "automated": false
+  },
   "items": [...],
   ...
 }
 ```
+
+#### `POST /api/orders/[id]/simulate-payment`
+
+Dispara el mismo flujo del bot de automatización que usa el webhook real, pero en modo controlado para demos.
+
+**Request body:**
+
+```json
+{
+  "paymentStatus": "approved",
+  "paymentId": "sim-123"
+}
+```
+
+**Response:**
+
+```json
+{
+  "outcome": "ready_for_fulfillment",
+  "orderId": 42,
+  "orderStatus": "ready_for_fulfillment",
+  "paymentStatus": "approved",
+  "notificationDelivered": true
+}
+```
+
+### Auth
+
+#### `POST /api/auth/register`
+
+Crea una cuenta con email y contraseña.
+
+#### `GET|POST /api/auth/[...nextauth]`
+
+Endpoints administrados por NextAuth para login, logout, sesión y callbacks OAuth.
 
 ### Shipping
 
@@ -573,16 +696,36 @@ Búsqueda semántica con Pinecone.
 {
   "results": [
     {
-      "id": "1",
-      "name": "Zapatillas Running Pro",
-      "description": "...",
-      "price": 35000,
-      "category": "Calzado",
+      "product": {
+        "id": 1,
+        "name": "Zapatillas Running Pro",
+        "description": "...",
+        "price": 35000,
+        "category": "Calzado",
+        "stock": 8,
+        "image": "https://..."
+      },
       "score": 0.89
     }
-  ]
+  ],
+  "query": "zapatillas cómodas para correr",
+  "count": 1
 }
 ```
+
+### Payments & Automation
+
+#### `POST /api/webhooks/mercadopago`
+
+Webhook de Mercado Pago. Consulta el pago real, actualiza la orden y dispara el bot de automatización si corresponde.
+
+#### `GET /api/automation-demo-events`
+
+Devuelve los eventos de demo recibidos por el endpoint interno del bot.
+
+#### `POST /api/automation-demo-events`
+
+Recibe notificaciones operativas de prueba cuando no se usa Slack o como respaldo para demos locales.
 
 ---
 
@@ -626,8 +769,31 @@ Búsqueda semántica con Pinecone.
 | subtotal             | numeric(10,2) | NOT NULL                    |
 | total                | numeric(10,2) | NOT NULL                    |
 | status               | text          | NOT NULL, DEFAULT 'pending' |
+| payment_id           | text          | nullable                    |
+| preference_id        | text          | nullable                    |
+| payment_status       | text          | nullable                    |
 | created_at           | timestamp     | NOT NULL, DEFAULT NOW()     |
 | items                | jsonb         | NOT NULL                    |
+
+#### `automation_events`
+
+| Campo      | Tipo      | Constraints             |
+| ---------- | --------- | ----------------------- |
+| id         | serial    | PRIMARY KEY             |
+| order_id   | integer   | FK -> orders.id         |
+| event_type | text      | NOT NULL                |
+| status     | text      | NOT NULL                |
+| message    | text      | NOT NULL                |
+| payload    | jsonb     | nullable                |
+| created_at | timestamp | NOT NULL, DEFAULT NOW() |
+
+#### `users`
+
+Tabla de usuarios usada por NextAuth y registro propio.
+
+#### `accounts`, `sessions`, `verification_tokens`
+
+Tablas auxiliares de NextAuth para OAuth, sesiones y verificación.
 
 ### Migraciones
 
@@ -647,6 +813,84 @@ Para explorar la DB visualmente:
 ```bash
 pnpm db:studio
 ```
+
+---
+
+## 🤖 Automatización
+
+### Order-to-Fulfillment Bot
+
+La aplicación incluye una automatización orientada a operaciones que corre cuando una orden recibe confirmación de pago.
+
+**Qué hace el bot:**
+
+1. Recibe un evento de pago desde Mercado Pago o desde el endpoint de simulación
+2. Busca la orden y valida su estado
+3. Verifica stock real de cada ítem
+4. Si hay stock:
+   - descuenta inventario
+   - mueve la orden a `ready_for_fulfillment`
+   - registra eventos en `automation_events`
+   - envía notificación operativa
+5. Si falta stock o hay inconsistencia:
+   - mueve la orden a `manual_review`
+   - registra la excepción
+   - envía alerta operativa
+
+### Estados de orden usados por la automatización
+
+- `pending`
+- `paid`
+- `ready_for_fulfillment`
+- `manual_review`
+- `cancelled`
+
+### Formas de ejecutarlo
+
+**Webhook real de Mercado Pago**
+
+- Se activa automáticamente desde `POST /api/webhooks/mercadopago`
+
+**Demo controlada**
+
+- Se activa manualmente con `POST /api/orders/[id]/simulate-payment`
+- Ideal para entrevistas, demos y pruebas locales sin depender del proveedor externo
+
+### Diagrama visual del flujo del bot
+
+```mermaid
+sequenceDiagram
+    participant U as Usuario
+    participant S as NexoShop
+    participant MP as Mercado Pago
+    participant BOT as Order Automation Bot
+    participant DB as PostgreSQL
+    participant N as Slack / Demo Endpoint
+
+    U->>S: Finaliza compra
+    S->>DB: Crea orden pending
+    S->>MP: Genera preferencia de pago
+    MP-->>S: Webhook payment approved
+    S->>BOT: processOrderPaymentAutomation()
+    BOT->>DB: Lee orden e items
+    BOT->>DB: Valida stock
+    alt Stock suficiente
+        BOT->>DB: Descuenta stock
+        BOT->>DB: Orden ready_for_fulfillment
+        BOT->>DB: Inserta automation_events
+        BOT->>N: Notifica orden lista
+    else Sin stock / error operativo
+        BOT->>DB: Orden manual_review
+        BOT->>DB: Inserta automation_events
+        BOT->>N: Notifica excepción
+    end
+```
+
+### Casos de uso de demo
+
+- **Demo local controlada**: crear orden y disparar `simulate-payment`
+- **Demo con Slack**: configurar `AUTOMATION_WEBHOOK_URL`
+- **Demo end-to-end**: exponer la app públicamente y usar el webhook real de Mercado Pago
 
 ---
 
@@ -696,6 +940,7 @@ pnpm test tests/integration
   - Creación de órdenes
   - Cálculo de costos de envío
   - Búsqueda semántica
+  - Base para pruebas de checkout y automatización
 
 **Características:**
 
@@ -722,6 +967,15 @@ pnpm test:e2e -- --project=chromium
 - `smoke.spec.ts`: Tests básicos de carga
 - `purchase-flow.spec.ts`: Flujo completo de compra
 - `search.spec.ts`: Funcionalidad de búsqueda
+
+### Tests del Bot de Automatización
+
+El proyecto incluye tests unitarios para el flujo de automatización:
+
+- orden aprobada con stock suficiente
+- orden aprobada sin stock suficiente
+- prevención de doble procesamiento
+- trazabilidad y notificaciones del bot
 
 ### Estructura de Tests
 
@@ -763,9 +1017,14 @@ git push origin main
 
 ```
 DATABASE_URL=postgresql://...
-GOOGLE_GEMINI_API_KEY=...
+AUTH_SECRET=...
+AUTH_GOOGLE_ID=...
+AUTH_GOOGLE_SECRET=...
+MP_ACCESS_TOKEN=...
+GOOGLE_GENERATIVE_AI_API_KEY=...
 PINECONE_API_KEY=...
 PINECONE_INDEX_NAME=products
+AUTOMATION_WEBHOOK_URL=https://hooks.slack.com/services/...
 ```
 
 4. **Deploy automático**
@@ -788,7 +1047,11 @@ docker build -t nexoshop-ecommerce .
 # Run
 docker run -p 3000:3000 \
   -e DATABASE_URL="..." \
-  -e GOOGLE_GEMINI_API_KEY="..." \
+  -e AUTH_SECRET="..." \
+  -e MP_ACCESS_TOKEN="..." \
+  -e GOOGLE_GENERATIVE_AI_API_KEY="..." \
+  -e PINECONE_API_KEY="..." \
+  -e PINECONE_INDEX_NAME="products" \
   nexoshop-ecommerce
 ```
 
