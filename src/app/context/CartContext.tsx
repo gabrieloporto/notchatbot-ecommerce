@@ -11,7 +11,7 @@ import {
 } from "react";
 
 // Types
-interface Product {
+export interface CartProduct {
   id: number;
   name: string;
   description: string;
@@ -20,8 +20,8 @@ interface Product {
   stock: number;
 }
 
-interface CartItem {
-  product: Product;
+export interface CartItem {
+  product: CartProduct;
   quantity: number;
 }
 
@@ -37,7 +37,7 @@ interface CartState {
 }
 
 interface CartContextType extends CartState {
-  addToCart: (product: Product) => void;
+  addToCart: (product: CartProduct) => void;
   removeFromCart: (productId: number) => void;
   updateQuantity: (productId: number, quantity: number) => void;
   getTotal: () => number;
@@ -169,7 +169,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   // Memoized callbacks
   const addToCart = useCallback(
-    (product: Product) => {
+    (product: CartProduct) => {
       setState((prev) => {
         const existingItem = prev.items.find(
           (item) => item.product.id === product.id,
@@ -225,7 +225,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
          }
       });
     },
-    [removeFromCart, toast],
+    [removeFromCart],
   );
 
   const calculateShipping = useCallback(
@@ -311,6 +311,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       subtotal,
       calculateShipping,
       clearCart,
+      setShouldOpenCart,
+      setIsCartModalOpen,
     ],
   );
 

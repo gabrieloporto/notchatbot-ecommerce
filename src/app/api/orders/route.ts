@@ -74,6 +74,14 @@ export async function POST(request: Request) {
       request.headers.get("origin") ?? `${protocol}://${host}`;
     const isLocalhost = host.includes("localhost");
 
+    if (!process.env.MP_ACCESS_TOKEN) {
+      return NextResponse.json({
+        ...order,
+        init_point: null,
+        sandbox_init_point: null,
+      });
+    }
+
     // Crear Preferencia de MercadoPago
     const preference = new Preference(mercadopago);
 

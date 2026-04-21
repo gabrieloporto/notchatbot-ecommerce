@@ -1,10 +1,11 @@
-import { Pinecone, Index, type RecordMetadata } from "@pinecone-database/pinecone";
+import { Pinecone, type Index, type RecordMetadata } from "@pinecone-database/pinecone";
 import { env } from "@/env";
 
 /**
  * Metadata que se almacena para cada producto en Pinecone
  */
 export type ProductMetadata = RecordMetadata;
+type PineconeMetadataFilter = Record<string, Record<string, string | number | boolean>>;
 
 /**
  * Cliente singleton para Pinecone
@@ -94,8 +95,8 @@ class PineconeClient {
    */
   static async query(
     vector: number[],
-    topK: number = 5,
-    filter?: Record<string, any>
+    topK = 5,
+    filter?: PineconeMetadataFilter,
   ) {
     const index = this.getIndex();
 
@@ -123,7 +124,7 @@ class PineconeClient {
     const index = this.getIndex();
 
     try {
-      await index.deleteOne(id);
+      await index.deleteOne({ id });
       console.log(`🗑️ Vector ${id} eliminado de Pinecone`);
     } catch (error) {
       console.error("❌ Error al eliminar vector de Pinecone:", error);

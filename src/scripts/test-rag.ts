@@ -7,6 +7,32 @@ import EmbeddingService from "../lib/embedding-service";
 import PineconeClient from "../lib/pinecone-client";
 import LLMService from "../lib/llm-service";
 
+function isProductMetadata(
+  metadata: unknown,
+): metadata is {
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  category: string;
+  stock: number;
+  image?: string;
+} {
+  if (!metadata || typeof metadata !== "object") {
+    return false;
+  }
+
+  const candidate = metadata as Record<string, unknown>;
+
+  return (
+    typeof candidate.id === "number" &&
+    typeof candidate.name === "string" &&
+    typeof candidate.price === "number" &&
+    typeof candidate.category === "string" &&
+    typeof candidate.stock === "number"
+  );
+}
+
 async function testRAGSystem() {
   console.log("🧪 Iniciando pruebas del sistema RAG\n");
 
@@ -26,27 +52,45 @@ async function testRAGSystem() {
     const results = await PineconeClient.query(embedding, 3);
     console.log(`✅ Encontrados ${results.matches.length} productos\n`);
 
+    const matchesWithMetadata = results.matches.filter(
+      (
+        match,
+      ): match is typeof match & {
+        metadata: {
+          id: number;
+          name: string;
+          description?: string;
+          price: number;
+          category: string;
+          stock: number;
+          image?: string;
+        };
+      } => isProductMetadata(match.metadata),
+    );
+
     // Mostrar resultados
-    results.matches.forEach((match, index) => {
-      console.log(`${index + 1}. ${match.metadata.name}`);
-      console.log(`   Precio: $${match.metadata.price}`);
-      console.log(`   Stock: ${match.metadata.stock}`);
-      console.log(`   Score: ${match.score?.toFixed(3)}\n`);
-    });
+    matchesWithMetadata.forEach((match, index) => {
+        console.log(`${index + 1}. ${match.metadata.name}`);
+        console.log(`   Precio: $${match.metadata.price}`);
+        console.log(`   Stock: ${match.metadata.stock}`);
+        console.log(`   Score: ${match.score?.toFixed(3)}\n`);
+      });
 
     // Test 2: Generación de Respuesta
     console.log("\n💬 Test 2: Generación de Respuesta con Gemini");
     console.log("─".repeat(50));
 
-    const products = results.matches.map(match => ({
-      id: match.metadata.id as number,
-      name: match.metadata.name as string,
-      description: match.metadata.description as string | undefined,
-      price: match.metadata.price as number,
-      category: match.metadata.category as string,
-      stock: match.metadata.stock as number,
-      image: match.metadata.image as string | undefined,
-    }));
+    const products = matchesWithMetadata
+      .map((match) => match.metadata)
+      .map((metadata) => ({
+        id: metadata.id,
+        name: metadata.name,
+        description: metadata.description,
+        price: metadata.price,
+        category: metadata.category,
+        stock: metadata.stock,
+        image: metadata.image,
+      }));
 
     console.log(`Generando respuesta para: "${query}"\n`);
     

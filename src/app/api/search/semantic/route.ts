@@ -2,6 +2,32 @@ import { NextResponse } from "next/server";
 import EmbeddingService from "@/lib/embedding-service";
 import PineconeClient from "@/lib/pinecone-client";
 
+function isSearchProductMetadata(
+  metadata: unknown,
+): metadata is {
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  category: string;
+  stock: number;
+  image?: string;
+} {
+  if (!metadata || typeof metadata !== "object") {
+    return false;
+  }
+
+  const candidate = metadata as Record<string, unknown>;
+
+  return (
+    typeof candidate.id === "number" &&
+    typeof candidate.name === "string" &&
+    typeof candidate.price === "number" &&
+    typeof candidate.category === "string" &&
+    typeof candidate.stock === "number"
+  );
+}
+
 /**
  * Endpoint de búsqueda semántica de productos
  * 
@@ -20,7 +46,11 @@ import PineconeClient from "@/lib/pinecone-client";
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as {
+      query?: unknown;
+      limit?: number;
+      minScore?: number;
+    };
     const { query, limit = 10, minScore = 0.7 } = body;
 
     // Validación
@@ -42,8 +72,26 @@ export async function POST(request: Request) {
 
     // Filtrar por score mínimo y formatear resultados
     const filteredResults = results.matches
-      .filter(match => match.score && match.score >= minScore)
-      .map(match => ({
+      .filter(
+        (
+          match,
+        ): match is typeof match & {
+          score: number;
+          metadata: {
+            id: number;
+            name: string;
+            description?: string;
+            price: number;
+            category: string;
+            stock: number;
+            image?: string;
+          };
+        } =>
+          typeof match.score === "number" &&
+          match.score >= minScore &&
+          isSearchProductMetadata(match.metadata),
+      )
+      .map((match) => ({
         product: {
           id: match.metadata.id,
           name: match.metadata.name,

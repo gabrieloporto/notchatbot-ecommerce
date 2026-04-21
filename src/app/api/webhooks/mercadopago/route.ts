@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
-import { db } from "@/server/db";
-import { orders } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
 import { Payment } from "mercadopago";
+
+import { processOrderPaymentAutomation } from "@/lib/order-automation";
 import { mercadopago } from "@/lib/mercadopago";
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as {
+      type?: string;
+      data?: {
+        id?: string | number;
+      };
+    };
 
     // MercadoPago envía diferentes tipos de notificaciones
     const { type, data } = body;
@@ -24,7 +28,12 @@ export async function POST(request: Request) {
 
     // Consultar el pago en la API de MercadoPago
     const payment = new Payment(mercadopago);
-    const paymentData = await payment.get({ id: paymentId });
+    const paymentData = (await payment.get({
+      id: paymentId,
+    })) as {
+      external_reference?: string | null;
+      status?: string | null;
+    };
 
     if (!paymentData.external_reference) {
       console.error("Payment has no external_reference:", paymentId);
@@ -37,37 +46,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ received: true }, { status: 200 });
     }
 
-    // Mapear el status de MP al status de nuestra orden
-    let orderStatus = "pending";
-    switch (paymentData.status) {
-      case "approved":
-        orderStatus = "paid";
-        break;
-      case "pending":
-      case "in_process":
-      case "authorized":
-        orderStatus = "pending";
-        break;
-      case "rejected":
-      case "cancelled":
-      case "refunded":
-      case "charged_back":
-        orderStatus = "cancelled";
-        break;
-    }
+    const host = request.headers.get("host") ?? "localhost:3000";
+    const protocol = host.includes("localhost") ? "http" : "https";
+    const baseUrl = request.headers.get("origin") ?? `${protocol}://${host}`;
 
-    // Actualizar la orden en la base de datos
-    await db
-      .update(orders)
-      .set({
-        paymentId: String(paymentId),
-        paymentStatus: paymentData.status ?? null,
-        status: orderStatus,
-      })
-      .where(eq(orders.id, orderId));
+    const result = await processOrderPaymentAutomation({
+      orderId,
+      paymentId: String(paymentId),
+      paymentStatus: paymentData.status ?? null,
+      paymentSource: "mercadopago_webhook",
+      paymentPayload: paymentData,
+      baseUrl,
+    });
 
     console.log(
-      `Webhook: Order #${orderId} updated — payment ${paymentId} status: ${paymentData.status}`,
+      `Webhook: Order #${orderId} updated by automation bot — payment ${paymentId} status: ${paymentData.status}, outcome: ${result.outcome}`,
     );
 
     return NextResponse.json({ received: true }, { status: 200 });

@@ -1,21 +1,14 @@
 "use client";
 
 import { useCart } from "@/app/context/CartContext";
+import { type CartItem } from "@/app/context/CartContext";
 import { formatPrice } from "@/utils/formatPrice";
 import Image from "next/image";
 import { memo, useMemo } from "react";
 
 // Types
 interface OrderItemProps {
-  item: {
-    product: {
-      id: number;
-      name: string;
-      price: number;
-      image: string;
-    };
-    quantity: number;
-  };
+  item: CartItem;
 }
 
 // Constants

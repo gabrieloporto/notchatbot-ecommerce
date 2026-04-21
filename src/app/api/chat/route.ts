@@ -3,6 +3,32 @@ import EmbeddingService from "@/lib/embedding-service";
 import PineconeClient from "@/lib/pinecone-client";
 import LLMService, { type ChatMessage } from "@/lib/llm-service";
 
+function isProductMetadata(
+  metadata: unknown,
+): metadata is {
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  category: string;
+  stock: number;
+  image?: string;
+} {
+  if (!metadata || typeof metadata !== "object") {
+    return false;
+  }
+
+  const candidate = metadata as Record<string, unknown>;
+
+  return (
+    typeof candidate.id === "number" &&
+    typeof candidate.name === "string" &&
+    typeof candidate.price === "number" &&
+    typeof candidate.category === "string" &&
+    typeof candidate.stock === "number"
+  );
+}
+
 /**
  * Endpoint de chat con RAG (Retrieval-Augmented Generation)
  * 
@@ -20,7 +46,10 @@ import LLMService, { type ChatMessage } from "@/lib/llm-service";
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body = (await request.json()) as {
+      message?: unknown;
+      conversationHistory?: ChatMessage[];
+    };
     const { message, conversationHistory = [] } = body;
 
     // Validación
@@ -46,15 +75,18 @@ export async function POST(request: Request) {
     );
 
     // Extraer metadata de productos
-    const relevantProducts = searchResults.matches.map(match => ({
-      id: match.metadata.id as number,
-      name: match.metadata.name as string,
-      description: match.metadata.description as string | undefined,
-      price: match.metadata.price as number,
-      category: match.metadata.category as string,
-      stock: match.metadata.stock as number,
-      image: match.metadata.image as string | undefined,
-    }));
+    const relevantProducts = searchResults.matches
+      .map((match) => match.metadata)
+      .filter(isProductMetadata)
+      .map((metadata) => ({
+        id: metadata.id,
+        name: metadata.name,
+        description: metadata.description,
+        price: metadata.price,
+        category: metadata.category,
+        stock: metadata.stock,
+        image: metadata.image,
+      }));
 
     console.log(`✅ Encontrados ${relevantProducts.length} productos relevantes`);
 
@@ -63,7 +95,7 @@ export async function POST(request: Request) {
     const response = await LLMService.generateResponse(
       message,
       relevantProducts,
-      conversationHistory as ChatMessage[]
+      conversationHistory
     );
 
     console.log("✅ Respuesta generada con Gemini");

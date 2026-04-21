@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { X, Trash2 } from "lucide-react";
 import { useCart } from "../context/CartContext";
+import { type CartItem as CartLineItem } from "../context/CartContext";
 import { useEffect, useState, useCallback, memo } from "react";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -10,21 +11,6 @@ import { Label } from "@/components/ui/label";
 import { formatPrice } from "@/utils/formatPrice";
 import Image from "next/image";
 import Link from "next/link";
-
-// Types
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  image: string;
-  stock: number;
-}
-
-interface CartItem {
-  product: Product;
-  quantity: number;
-}
 
 interface CartModalProps {
   isOpen: boolean;
@@ -43,7 +29,7 @@ const CartItem = memo(function CartItem({
   onUpdateQuantity,
   onRemove,
 }: {
-  item: CartItem;
+  item: CartLineItem;
   onUpdateQuantity: (id: number, quantity: number) => void;
   onRemove: (id: number) => void;
 }) {

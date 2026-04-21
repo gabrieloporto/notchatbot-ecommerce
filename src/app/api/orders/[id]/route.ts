@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { db } from "@/server/db";
-import { orders } from "@/server/db/schema";
-import { eq } from "drizzle-orm";
+import { automationEvents, orders } from "@/server/db/schema";
+import { asc, eq } from "drizzle-orm";
 
 export async function GET(
-  request: Request,
+  _request: Request,
   context: { params: { id: string } } | { params: Promise<{ id: string }> },
 ) {
   // Extrae el parámetro id de la ruta (puede ser Promise o valor directo)
@@ -23,8 +23,26 @@ export async function GET(
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }
 
-    // Devuelve la orden encontrada
-    return NextResponse.json(order[0]);
+    const foundOrder = order[0]!;
+
+    const events = await db
+      .select()
+      .from(automationEvents)
+      .where(eq(automationEvents.orderId, foundOrder.id))
+      .orderBy(asc(automationEvents.createdAt));
+
+    // Devuelve la orden encontrada con trazabilidad del bot
+    return NextResponse.json({
+      ...foundOrder,
+      automationEvents: events,
+      automationSummary: {
+        totalEvents: events.length,
+        lastEvent: events.at(-1) ?? null,
+        automated:
+          foundOrder.status === "ready_for_fulfillment" ||
+          foundOrder.status === "manual_review",
+      },
+    });
   } catch (error) {
     console.error("Error fetching order:", error);
     return NextResponse.json(

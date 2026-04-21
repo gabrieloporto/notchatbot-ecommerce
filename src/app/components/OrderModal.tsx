@@ -1,9 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { getOrderStatusLabel, getOrderStatusStyle } from "@/lib/order-status";
 import { formatPrice } from "@/utils/formatPrice";
 import { memo } from "react";
 import Image from "next/image";
+
+interface AutomationEvent {
+  id: number;
+  eventType: string;
+  status: string;
+  message: string;
+  createdAt: string;
+}
 
 interface OrderModalProps {
   isOpen: boolean;
@@ -11,9 +20,10 @@ interface OrderModalProps {
   order: {
     id: number;
     customerName: string;
-    total: number;
+    total: number | string;
     status: string;
     createdAt: string;
+    automationEvents?: AutomationEvent[];
     items: Array<{
       product: {
         id: number;
@@ -32,6 +42,9 @@ export const OrderModal = memo(function OrderModal({
   order,
 }: OrderModalProps) {
   if (!isOpen) return null;
+
+  const statusLabel = getOrderStatusLabel(order.status);
+  const statusStyle = getOrderStatusStyle(order.status);
 
   return (
     <div className="fixed inset-0 z-50">
@@ -65,15 +78,7 @@ export const OrderModal = memo(function OrderModal({
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Estado:</span>{" "}
-                    <span
-                      className={`${
-                        order.status === "pending"
-                          ? "text-yellow-600"
-                          : "text-green-600"
-                      }`}
-                    >
-                      {order.status === "pending" ? "Pendiente" : "Completada"}
-                    </span>
+                    <span className={statusStyle}>{statusLabel}</span>
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Fecha:</span>{" "}
@@ -109,6 +114,20 @@ export const OrderModal = memo(function OrderModal({
                   </div>
                 ))}
               </div>
+
+              {!!order.automationEvents?.length && (
+                <div className="space-y-3">
+                  <h3 className="font-medium">Eventos de automatizacion</h3>
+                  {order.automationEvents.slice(-3).map((event) => (
+                    <div key={event.id} className="rounded-md border bg-gray-50 p-3">
+                      <p className="text-sm font-medium">{event.message}</p>
+                      <p className="mt-1 text-xs text-gray-500">
+                        {event.eventType} · {new Date(event.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="mt-6">

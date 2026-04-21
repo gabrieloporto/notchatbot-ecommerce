@@ -111,3 +111,15 @@ export const orders = pgTable("orders", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   items: jsonb("items").notNull(),
 });
+
+export const automationEvents = pgTable("automation_events", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id")
+    .notNull()
+    .references(() => orders.id, { onDelete: "cascade" }),
+  eventType: text("event_type").notNull(),
+  status: text("status").notNull(),
+  message: text("message").notNull(),
+  payload: jsonb("payload"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
